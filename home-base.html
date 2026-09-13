@@ -518,17 +518,16 @@ nav.tabs::-webkit-scrollbar{display:none}
 let currentMonth = new Date().toISOString().slice(0,7);
 let txType = 'expense';
 
-function load(key) { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } }
+function load(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
 function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-let state = load('homeBase.v1') || {
-  children: {},
-  routines: [],
-  habits: [],
-  transactions: [],
-  budgets: [],
-  loans: []
-};
+let state = load('homeBase.v1') || {};
+state.children = state.children || {};
+state.routines = state.routines || [];
+state.habits = state.habits || [];
+state.transactions = state.transactions || [];
+state.budgets = state.budgets || [];
+state.loans = state.loans || [];
 
 // ── INIT ───────────────────────────────────────────────
 window.onload = () => {
