@@ -25,6 +25,17 @@
         ],
         "default_model": "qwen/qwen3-32b"
     },
+    "local": {
+        "base_url": "http://localhost:8080/v1",
+        "key_var": "HACX_LOCAL_KEY",
+        "models": [
+            {
+                "name": "davidau/qwen3.5-9b-the-defiant-fable-uncensored-heretic-neo-imatrix-max-mtp-gguf",
+                "alias": "Qwen3.5 9B Defiant Fable Heretic (Local GGUF)"
+            }
+        ],
+        "default_model": "davidau/qwen3.5-9b-the-defiant-fable-uncensored-heretic-neo-imatrix-max-mtp-gguf"
+    },
     "openrouter": {
         "base_url": "https://openrouter.ai/api/v1",
         "key_var": "HAC_OPENROUTER_KEY",
