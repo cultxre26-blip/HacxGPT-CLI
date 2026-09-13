@@ -17,7 +17,8 @@ setup(
         "pyperclip",
         "colorama",
         "prompt_toolkit",
-        "requests"
+        "requests",
+        "cryptography"
     ],
     entry_points={
         "console_scripts": [
