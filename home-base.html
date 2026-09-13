@@ -169,6 +169,14 @@ nav.tabs::-webkit-scrollbar{display:none}
 .empty h3{margin-bottom:8px;font-size:1.3rem;color:var(--ink)}
 .empty p{color:var(--ink-faint);max-width:400px;margin:0 auto 20px}
 
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
+  background:linear-gradient(180deg,rgba(30,26,46,.97),rgba(20,17,32,.97));border:1px solid var(--stroke-strong);
+  color:var(--ink);padding:12px 20px;border-radius:12px;font-size:.88rem;box-shadow:var(--shadow-lg);
+  opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:300;max-width:88vw;text-align:center;
+  backdrop-filter:blur(16px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{border-color:var(--danger);color:var(--danger)}
+
 .lock-overlay{position:fixed;inset:0;z-index:200;background:var(--bg);display:grid;place-items:center;padding:20px}
 .lock-box{max-width:340px;width:100%;text-align:center;background:var(--glass);border:1px solid var(--stroke);
   border-radius:var(--radius-lg);padding:32px 24px;backdrop-filter:blur(20px);animation:cardIn .4s var(--ease)}
@@ -204,6 +212,7 @@ nav.tabs::-webkit-scrollbar{display:none}
 .routine-del:hover{color:var(--danger)}
 .routine-empty{font-size:.8rem;color:var(--ink-faint);padding:6px 2px}
 
+#confirmModal{z-index:150}
 .overlay{position:fixed;inset:0;background:rgba(6,5,12,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   display:grid;place-items:center;z-index:50;padding:16px;overflow-y:auto;animation:overlayIn .25s var(--ease);display:none}
 .overlay.open{display:grid}
@@ -292,6 +301,7 @@ nav.tabs::-webkit-scrollbar{display:none}
         <span class="ic">💰</span> Money
       </button>
     </nav>
+    <button class="btn ghost sm" onclick="openModal('data')" title="Backup / Restore">⇅</button>
     <button class="btn ghost sm" id="lockBtn" onclick="handleLockButton()" title="Secure your data">🔓</button>
   </div>
 </header>
@@ -607,6 +617,41 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
 </div>
 
+<!-- CONFIRM MODAL -->
+<div class="overlay" id="confirmModal">
+  <div class="modal" style="max-width:360px">
+    <h2>Are you sure?</h2>
+    <div class="modal-sub" id="confirmMessage">This action cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="resolveConfirm(false)">Cancel</button>
+      <button class="btn danger" onclick="resolveConfirm(true)">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- BACKUP / RESTORE MODAL -->
+<div class="overlay" id="dataModal">
+  <div class="modal">
+    <h2>Backup Your Data</h2>
+    <div class="modal-sub">Copy this to save a backup, or paste one below to restore it. Export always gives you decrypted, readable JSON — even if your data is PIN-locked.</div>
+    <div class="field">
+      <label>Export</label>
+      <textarea id="exportArea" readonly rows="5" style="font-family:monospace;font-size:.7rem"></textarea>
+      <button class="btn secondary sm" style="margin-top:8px" onclick="copyExport()">Copy to Clipboard</button>
+    </div>
+    <div class="field">
+      <label>Import (replaces all current data)</label>
+      <textarea id="importArea" rows="5" placeholder="Paste backup JSON here…" style="font-family:monospace;font-size:.7rem"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal('data')">Close</button>
+      <button class="btn danger" onclick="importData()">Import &amp; Replace</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <!-- SECURITY SETUP MODAL -->
 <div class="overlay" id="securityModal">
   <div class="modal">
@@ -805,6 +850,55 @@ window.onload = () => {
   });
 };
 
+// ── TOAST / CONFIRM (replace native alert/confirm) ──────
+function showToast(msg, kind) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (kind === 'error' ? ' error' : '');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { el.className = 'toast'; }, 2600);
+}
+
+let _confirmResolve = null;
+function showConfirm(message) {
+  document.getElementById('confirmMessage').textContent = message;
+  document.getElementById('confirmModal').classList.add('open');
+  return new Promise(resolve => { _confirmResolve = resolve; });
+}
+function resolveConfirm(result) {
+  document.getElementById('confirmModal').classList.remove('open');
+  if (_confirmResolve) { _confirmResolve(result); _confirmResolve = null; }
+}
+
+// ── BACKUP / RESTORE ─────────────────────────────────────
+function openDataModal() {
+  document.getElementById('exportArea').value = JSON.stringify(state, null, 2);
+  document.getElementById('importArea').value = '';
+  document.getElementById('dataModal').classList.add('open');
+}
+async function copyExport() {
+  const text = document.getElementById('exportArea').value;
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Copied to clipboard');
+  } catch (e) {
+    document.getElementById('exportArea').select();
+    showToast('Select the text above and copy manually', 'error');
+  }
+}
+async function importData() {
+  const raw = document.getElementById('importArea').value.trim();
+  if (!raw) return showToast('Paste your backup JSON first', 'error');
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch (e) { return showToast("That doesn't look like valid JSON", 'error'); }
+  if (!(await showConfirm('This replaces ALL current data with the pasted backup. Continue?'))) return;
+  state = fillDefaults(parsed);
+  persistState();
+  closeModal('data');
+  updateAllTabs();
+  showToast('Data imported');
+}
+
 function switchTabTo(tabName) {
   document.querySelectorAll('.tab').forEach(t => t.removeAttribute('aria-current'));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -822,7 +916,8 @@ function updateAllTabs() {
 // ── HOME TAB ────────────────────────────────────────────
 function updateHomeTab() {
   const childCount = Object.keys(state.children).length;
-  const todayRoutines = state.routines.filter(r => r.completed).length;
+  const todayStr = new Date().toISOString().slice(0,10);
+  const todayRoutines = state.routines.filter(r => r.completed && r.completedAt === todayStr).length;
   const monthTxs = state.transactions.filter(t => t.date.slice(0,7) === currentMonth);
   const income = monthTxs.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
   const expenses = monthTxs.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
@@ -886,6 +981,7 @@ function updateChildrenTab() {
           <li class="routine-item">
             <button type="button" class="routine-check${r.completed ? ' done' : ''}" data-toggle-routine="${r.id}" aria-label="${r.completed ? 'Mark not done' : 'Mark done'}">${r.completed ? '✓' : ''}</button>
             <span class="routine-text${r.completed ? ' done' : ''}">${escapeHtml(r.task)}</span>
+            <button type="button" class="routine-del" data-edit-routine="${r.id}" aria-label="Edit">✏️</button>
             <button type="button" class="routine-del" data-del-routine="${r.id}" aria-label="Remove">✕</button>
           </li>`).join('')}</ul>`
       : `<div class="routine-empty">${allRoutines.length ? 'No routines match.' : 'No routines yet.'}</div>`;
@@ -894,9 +990,13 @@ function updateChildrenTab() {
       <div class="card" style="display:flex;flex-direction:column;gap:12px;--delay:${idx}">
         <div style="display:flex;align-items:center;gap:14px">
           <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,${bgColor},#7c9cff);display:grid;place-items:center;color:white;font-family:var(--font-head);font-weight:700;font-size:1.3rem;flex-shrink:0;box-shadow:0 8px 20px -6px rgba(0,0,0,.4)">${escapeHtml(child.name.charAt(0))}</div>
-          <div>
+          <div style="flex:1;min-width:0">
             <div style="font-family:var(--font-head);font-weight:700;font-size:1.15rem">${escapeHtml(child.name)}</div>
             <div style="font-size:.85rem;color:var(--ink-faint);font-weight:500">${new Date().getFullYear() - child.birthYear} years old</div>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button class="btn ghost sm" onclick="openModal('child','${child.id}')" aria-label="Edit">✏️</button>
+            <button class="btn ghost sm" onclick="deleteChild('${child.id}')" aria-label="Delete">🗑</button>
           </div>
         </div>
         <div style="font-size:.75rem;font-weight:600;padding:6px 12px;border-radius:999px;background:rgba(110,231,199,.12);color:var(--a1);border:1px solid rgba(110,231,199,.2);width:fit-content">${completed}/${allRoutines.length} routines</div>
@@ -911,6 +1011,9 @@ function updateChildrenTab() {
   list.querySelectorAll('[data-toggle-routine]').forEach(btn => {
     btn.addEventListener('click', () => toggleRoutine(btn.getAttribute('data-toggle-routine')));
   });
+  list.querySelectorAll('[data-edit-routine]').forEach(btn => {
+    btn.addEventListener('click', () => openModal('routine', btn.getAttribute('data-edit-routine')));
+  });
   list.querySelectorAll('[data-del-routine]').forEach(btn => {
     btn.addEventListener('click', () => deleteRoutine(btn.getAttribute('data-del-routine')));
   });
@@ -920,12 +1023,22 @@ function toggleRoutine(id) {
   const r = state.routines.find(x => x.id === id);
   if (!r) return;
   r.completed = !r.completed;
+  r.completedAt = r.completed ? new Date().toISOString().slice(0,10) : '';
   persistState();
   updateAllTabs();
 }
 
-function deleteRoutine(id) {
+async function deleteRoutine(id) {
+  if (!(await showConfirm('Delete this routine?'))) return;
   state.routines = state.routines.filter(r => r.id !== id);
+  persistState();
+  updateAllTabs();
+}
+
+async function deleteChild(id) {
+  if (!(await showConfirm('Delete this child and all their routines? This cannot be undone.'))) return;
+  delete state.children[id];
+  state.routines = state.routines.filter(r => r.childId !== id);
   persistState();
   updateAllTabs();
 }
@@ -977,7 +1090,10 @@ function updateMoneyTab() {
         </div>
         <div class="tx-right">
           <div class="tx-amount ${tx.type}">${tx.type === 'income' ? '+' : '-'}$${tx.amount.toFixed(2)}</div>
-          <button class="btn ghost sm" onclick="deleteTransaction('${tx.id}')">🗑</button>
+          <div style="display:flex;gap:4px;justify-content:flex-end;margin-top:4px">
+            <button class="btn ghost sm" onclick="openModal('transaction','${tx.id}')" aria-label="Edit">✏️</button>
+            <button class="btn ghost sm" onclick="deleteTransaction('${tx.id}')" aria-label="Delete">🗑</button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -1003,7 +1119,10 @@ function updateMoneyTab() {
         <div class="budget-item" style="--delay:${idx}">
           <div class="budget-top">
             <div>${categoryIcon(budget.category)} ${escapeHtml(budget.category)}</div>
-            <button class="btn ghost sm" onclick="deleteBudget('${budget.id}')">🗑</button>
+            <div style="display:flex;gap:4px">
+              <button class="btn ghost sm" onclick="openModal('budget','${budget.id}')" aria-label="Edit">✏️</button>
+              <button class="btn ghost sm" onclick="deleteBudget('${budget.id}')" aria-label="Delete">🗑</button>
+            </div>
           </div>
           <div style="font-size:.8rem;color:var(--ink-faint);margin-bottom:8px">$${spent.toFixed(2)} / $${budget.limit.toFixed(2)}</div>
           <div class="budget-bar">
@@ -1030,7 +1149,10 @@ function updateMoneyTab() {
         <div class="budget-item" style="--delay:${idx}">
           <div class="budget-top">
             <div>🏦 ${escapeHtml(loan.name)}</div>
-            <button class="btn ghost sm" onclick="deleteLoan('${loan.id}')">🗑</button>
+            <div style="display:flex;gap:4px">
+              <button class="btn ghost sm" onclick="openModal('loan','${loan.id}')" aria-label="Edit">✏️</button>
+              <button class="btn ghost sm" onclick="deleteLoan('${loan.id}')" aria-label="Delete">🗑</button>
+            </div>
           </div>
           <div style="font-size:.8rem;color:var(--ink-faint);margin-bottom:8px">$${loan.remaining.toFixed(2)} / $${loan.total.toFixed(2)} remaining</div>
           <div class="budget-bar">
@@ -1048,22 +1170,91 @@ function changeMonth() {
 }
 
 // ── MODALS ─────────────────────────────────────────────
-function openModal(type) {
+let editingChildId = null;
+let editingRoutineId = null;
+let editingTxId = null;
+let editingBudgetId = null;
+let editingLoanId = null;
+
+function openModal(type, id) {
   if (type === 'child') {
+    editingChildId = id || null;
+    if (id) {
+      const c = state.children[id];
+      document.getElementById('childName').value = c.name;
+      document.getElementById('childYear').value = c.birthYear;
+      document.querySelector('#childModal h2').textContent = 'Edit Child';
+    } else {
+      document.getElementById('childName').value = '';
+      document.getElementById('childYear').value = '';
+      document.querySelector('#childModal h2').textContent = 'Add Child';
+    }
     document.getElementById('childModal').classList.add('open');
   } else if (type === 'routine') {
+    editingRoutineId = id || null;
     const childSelect = document.getElementById('routineChild');
-    childSelect.innerHTML = Object.values(state.children).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    childSelect.innerHTML = Object.values(state.children).map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+    if (id) {
+      const r = state.routines.find(x => x.id === id);
+      childSelect.value = r.childId;
+      document.getElementById('routineTask').value = r.task;
+      document.querySelector('#routineModal h2').textContent = 'Edit Routine';
+    } else {
+      document.getElementById('routineTask').value = '';
+      document.querySelector('#routineModal h2').textContent = 'Add Routine';
+    }
     document.getElementById('routineModal').classList.add('open');
   } else if (type === 'transaction') {
-    document.getElementById('txDate').value = new Date().toISOString().slice(0,10);
+    editingTxId = id || null;
+    if (id) {
+      const t = state.transactions.find(x => x.id === id);
+      setType(t.type);
+      document.getElementById('txDesc').value = t.desc;
+      document.getElementById('txAmount').value = t.amount;
+      document.getElementById('txCat').value = t.category;
+      document.getElementById('txDate').value = t.date;
+      document.querySelector('#transactionModal h2').textContent = 'Edit Transaction';
+    } else {
+      setType('expense');
+      document.getElementById('txDesc').value = '';
+      document.getElementById('txAmount').value = '';
+      document.getElementById('txDate').value = new Date().toISOString().slice(0,10);
+      document.querySelector('#transactionModal h2').textContent = 'Add Transaction';
+    }
     document.getElementById('transactionModal').classList.add('open');
   } else if (type === 'budget') {
+    editingBudgetId = id || null;
+    if (id) {
+      const b = state.budgets.find(x => x.id === id);
+      document.getElementById('budgetCat').value = b.category;
+      document.getElementById('budgetAmount').value = b.limit;
+      document.querySelector('#budgetModal h2').textContent = 'Edit Budget';
+    } else {
+      document.getElementById('budgetAmount').value = '';
+      document.querySelector('#budgetModal h2').textContent = 'Set Budget';
+    }
     document.getElementById('budgetModal').classList.add('open');
   } else if (type === 'loan') {
+    editingLoanId = id || null;
+    if (id) {
+      const l = state.loans.find(x => x.id === id);
+      document.getElementById('loanName').value = l.name;
+      document.getElementById('loanTotal').value = l.total;
+      document.getElementById('loanRemaining').value = l.remaining;
+      document.getElementById('loanRate').value = l.rate;
+      document.querySelector('#loanModal h2').textContent = 'Edit Loan';
+    } else {
+      document.getElementById('loanName').value = '';
+      document.getElementById('loanTotal').value = '';
+      document.getElementById('loanRemaining').value = '';
+      document.getElementById('loanRate').value = '';
+      document.querySelector('#loanModal h2').textContent = 'Add Loan';
+    }
     document.getElementById('loanModal').classList.add('open');
   } else if (type === 'security') {
     document.getElementById('securityModal').classList.add('open');
+  } else if (type === 'data') {
+    openDataModal();
   }
 }
 
@@ -1074,11 +1265,17 @@ function closeModal(type) {
     'transaction': 'transactionModal',
     'budget': 'budgetModal',
     'loan': 'loanModal',
-    'security': 'securityModal'
+    'security': 'securityModal',
+    'data': 'dataModal'
   };
   if (modals[type]) {
     document.getElementById(modals[type]).classList.remove('open');
   }
+  if (type === 'child') editingChildId = null;
+  if (type === 'routine') editingRoutineId = null;
+  if (type === 'transaction') editingTxId = null;
+  if (type === 'budget') editingBudgetId = null;
+  if (type === 'loan') editingLoanId = null;
 }
 
 function setType(t) {
@@ -1091,32 +1288,40 @@ function setType(t) {
 function saveChild() {
   const name = document.getElementById('childName').value.trim();
   const year = parseInt(document.getElementById('childYear').value);
-  if (!name || !year) return alert('Please fill in all fields');
+  if (!name || !year) return showToast('Please fill in all fields', 'error');
 
-  const id = Date.now().toString();
-  state.children[id] = { id, name, birthYear: year };
+  if (editingChildId) {
+    state.children[editingChildId].name = name;
+    state.children[editingChildId].birthYear = year;
+  } else {
+    const id = Date.now().toString();
+    state.children[id] = { id, name, birthYear: year };
+  }
   persistState();
   closeModal('child');
-  document.getElementById('childName').value = '';
-  document.getElementById('childYear').value = '';
   updateAllTabs();
 }
 
 function saveRoutine() {
   const childId = document.getElementById('routineChild').value;
   const task = document.getElementById('routineTask').value.trim();
-  if (!childId || !task) return alert('Please fill in all fields');
+  if (!childId || !task) return showToast('Please fill in all fields', 'error');
 
-  state.routines.push({
-    id: Date.now().toString(),
-    childId,
-    task,
-    completed: false,
-    date: new Date().toISOString().slice(0,10)
-  });
+  if (editingRoutineId) {
+    const r = state.routines.find(x => x.id === editingRoutineId);
+    r.childId = childId;
+    r.task = task;
+  } else {
+    state.routines.push({
+      id: Date.now().toString(),
+      childId,
+      task,
+      completed: false,
+      date: new Date().toISOString().slice(0,10)
+    });
+  }
   persistState();
   closeModal('routine');
-  document.getElementById('routineTask').value = '';
   updateAllTabs();
 }
 
@@ -1127,25 +1332,28 @@ function saveTransaction() {
   const category = document.getElementById('txCat').value;
   const date = document.getElementById('txDate').value;
 
-  if (!desc || !amount || amount <= 0 || !date) return alert('Please fill in all fields');
+  if (!desc || !amount || amount <= 0 || !date) return showToast('Please fill in all fields', 'error');
 
-  state.transactions.push({
-    id: Date.now().toString(),
-    type: txType,
-    desc,
-    amount,
-    category,
-    date
-  });
+  if (editingTxId) {
+    const t = state.transactions.find(x => x.id === editingTxId);
+    t.type = txType; t.desc = desc; t.amount = amount; t.category = category; t.date = date;
+  } else {
+    state.transactions.push({
+      id: Date.now().toString(),
+      type: txType,
+      desc,
+      amount,
+      category,
+      date
+    });
+  }
   persistState();
   closeModal('transaction');
-  document.getElementById('txDesc').value = '';
-  document.getElementById('txAmount').value = '';
   updateAllTabs();
 }
 
-function deleteTransaction(id) {
-  if (!confirm('Delete this transaction?')) return;
+async function deleteTransaction(id) {
+  if (!(await showConfirm('Delete this transaction?'))) return;
   state.transactions = state.transactions.filter(t => t.id !== id);
   persistState();
   updateMoneyTab();
@@ -1154,25 +1362,31 @@ function deleteTransaction(id) {
 function saveBudget() {
   const category = document.getElementById('budgetCat').value;
   const limit = parseFloat(document.getElementById('budgetAmount').value);
-  if (!limit || limit <= 0) return alert('Please enter a valid amount');
+  if (!limit || limit <= 0) return showToast('Please enter a valid amount', 'error');
 
-  const existing = state.budgets.findIndex(b => b.category === category);
-  if (existing >= 0) {
-    state.budgets[existing].limit = limit;
+  if (editingBudgetId) {
+    const b = state.budgets.find(x => x.id === editingBudgetId);
+    b.category = category;
+    b.limit = limit;
   } else {
-    state.budgets.push({
-      id: Date.now().toString(),
-      category,
-      limit
-    });
+    const existing = state.budgets.findIndex(b => b.category === category);
+    if (existing >= 0) {
+      state.budgets[existing].limit = limit;
+    } else {
+      state.budgets.push({
+        id: Date.now().toString(),
+        category,
+        limit
+      });
+    }
   }
   persistState();
   closeModal('budget');
-  document.getElementById('budgetAmount').value = '';
   updateMoneyTab();
 }
 
-function deleteBudget(id) {
+async function deleteBudget(id) {
+  if (!(await showConfirm('Delete this budget?'))) return;
   state.budgets = state.budgets.filter(b => b.id !== id);
   persistState();
   updateMoneyTab();
@@ -1184,25 +1398,27 @@ function saveLoan() {
   const remaining = parseFloat(document.getElementById('loanRemaining').value);
   const rate = parseFloat(document.getElementById('loanRate').value) || 0;
 
-  if (!name || !total || !remaining) return alert('Please fill in all fields');
+  if (!name || !total || !remaining) return showToast('Please fill in all fields', 'error');
 
-  state.loans.push({
-    id: Date.now().toString(),
-    name,
-    total,
-    remaining,
-    rate
-  });
+  if (editingLoanId) {
+    const l = state.loans.find(x => x.id === editingLoanId);
+    l.name = name; l.total = total; l.remaining = remaining; l.rate = rate;
+  } else {
+    state.loans.push({
+      id: Date.now().toString(),
+      name,
+      total,
+      remaining,
+      rate
+    });
+  }
   persistState();
   closeModal('loan');
-  document.getElementById('loanName').value = '';
-  document.getElementById('loanTotal').value = '';
-  document.getElementById('loanRemaining').value = '';
-  document.getElementById('loanRate').value = '';
   updateMoneyTab();
 }
 
-function deleteLoan(id) {
+async function deleteLoan(id) {
+  if (!(await showConfirm('Delete this loan?'))) return;
   state.loans = state.loans.filter(l => l.id !== id);
   persistState();
   updateMoneyTab();
