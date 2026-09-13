@@ -7,4 +7,5 @@ build/
 dist/
 *.egg-info/
 .hacx_history
-.pytest_cache/node_modules/
+.pytest_cache/
+node_modules/
