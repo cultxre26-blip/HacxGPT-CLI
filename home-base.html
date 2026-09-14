@@ -332,6 +332,18 @@ nav.tabs::-webkit-scrollbar{display:none}
       <div class="stat-value negative" id="todayExpenses">$0.00</div>
       <div class="stat-sub">this month</div>
     </div>
+    <div class="stat-card" style="--delay:4">
+      <div class="stat-label">Net Worth</div>
+      <div class="stat-value" id="netWorth">$0.00</div>
+      <div class="stat-sub" id="netWorthLabel">assets − loans</div>
+    </div>
+  </div>
+
+  <div id="alertsSection" style="display:none">
+    <div class="section-head" style="margin-top:40px">
+      <h2>Needs Attention</h2>
+    </div>
+    <div id="alertsList" class="grid" style="grid-template-columns:1fr"></div>
   </div>
 
   <div class="section-head" style="margin-top:40px">
@@ -349,6 +361,9 @@ nav.tabs::-webkit-scrollbar{display:none}
     </button>
     <button class="btn secondary" onclick="openModal('transaction')">
       <span>💸</span> Log Transaction
+    </button>
+    <button class="btn secondary" onclick="openModal('bill')">
+      <span>🔁</span> Add Bill
     </button>
   </div>
 </div>
@@ -451,6 +466,21 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
 
   <div class="section-head" style="margin-top:40px">
+    <h2>Bills & Recurring Payments</h2>
+    <div style="display:flex;gap:8px">
+      <button class="btn secondary" onclick="openModal('importJaysDay')">Import from Jay's Day</button>
+      <button class="btn" onclick="openModal('bill')">+ Add Bill</button>
+    </div>
+  </div>
+  <div id="recurringSuggestions"></div>
+  <div id="billList" class="grid"></div>
+  <div id="billEmpty" class="empty">
+    <div class="em">🔁</div>
+    <h3>No bills tracked</h3>
+    <p>Add recurring bills to get reminded before they're due — or let Home Base detect them from your transactions below.</p>
+  </div>
+
+  <div class="section-head" style="margin-top:40px">
     <h2>Budgets</h2>
     <button class="btn" onclick="openModal('budget')">+ Set Budget</button>
   </div>
@@ -470,6 +500,32 @@ nav.tabs::-webkit-scrollbar{display:none}
     <div class="em">📋</div>
     <h3>No loans tracked</h3>
     <p>Add loans to monitor repayments and interest.</p>
+  </div>
+
+  <div class="section-head" style="margin-top:40px">
+    <h2>Investments & Net Worth</h2>
+    <button class="btn" onclick="openModal('investment')">+ Add Asset</button>
+  </div>
+  <div id="investmentList" class="grid"></div>
+  <div id="investmentEmpty" class="empty">
+    <div class="em">📦</div>
+    <h3>No assets tracked</h3>
+    <p>Add savings, super, shares, or property to see your net worth on the Home tab.</p>
+  </div>
+
+  <div class="section-head" style="margin-top:40px">
+    <h2>Financial Principles</h2>
+  </div>
+  <div class="card" style="line-height:1.6">
+    <p style="font-size:.8rem;color:var(--ink-faint);margin-bottom:12px;font-weight:600">GENERAL EDUCATION — NOT PERSONALIZED FINANCIAL ADVICE</p>
+    <p style="margin-bottom:10px">These are widely-cited general principles, not a recommendation for your specific situation. For advice tailored to you, talk to a licensed financial advisor.</p>
+    <ul style="margin:0;padding-left:20px;color:var(--ink-soft)">
+      <li style="margin-bottom:6px">Build an emergency fund covering 3–6 months of essential expenses before investing.</li>
+      <li style="margin-bottom:6px">Pay down high-interest debt (credit cards, high-rate loans) before most investing — the "return" is the interest rate you stop paying.</li>
+      <li style="margin-bottom:6px">Diversify across asset types rather than concentrating in one stock, sector, or property.</li>
+      <li style="margin-bottom:6px">Time in the market generally matters more than timing the market for long-term goals.</li>
+      <li>Review your net worth and spending regularly — small recurring costs compound quietly.</li>
+    </ul>
   </div>
 </div>
 </div>
@@ -617,6 +673,96 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
 </div>
 
+<!-- ADD BILL MODAL -->
+<div class="overlay" id="billModal">
+  <div class="modal">
+    <h2>Add Bill</h2>
+    <div class="modal-sub">A recurring or one-off payment to keep on top of</div>
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="billName" placeholder="e.g. Rent, Netflix, Car rego">
+    </div>
+    <div class="field">
+      <label>Amount (AUD)</label>
+      <input type="number" id="billAmount" placeholder="0.00" step="0.01" min="0">
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <select id="billCat">
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Utilities</option>
+        <option>Entertainment</option>
+        <option>Groceries</option>
+        <option>Health</option>
+        <option>Personal</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Next Due Date</label>
+      <input type="date" id="billDueDate">
+    </div>
+    <div class="field">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0">
+        <input type="checkbox" id="billRecurring" style="width:auto">
+        Repeats monthly
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal('bill')">Cancel</button>
+      <button class="btn" onclick="saveBill()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD INVESTMENT MODAL -->
+<div class="overlay" id="investmentModal">
+  <div class="modal">
+    <h2>Add Asset</h2>
+    <div class="modal-sub">Savings, super, shares, property — anything that adds to your net worth</div>
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="investName" placeholder="e.g. Super, Savings account, ETF portfolio">
+    </div>
+    <div class="field">
+      <label>Type</label>
+      <select id="investType">
+        <option>Savings</option>
+        <option>Super / Retirement</option>
+        <option>Shares / ETFs</option>
+        <option>Property</option>
+        <option>Crypto</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Current Value (AUD)</label>
+      <input type="number" id="investValue" placeholder="0.00" step="0.01" min="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal('investment')">Cancel</button>
+      <button class="btn" onclick="saveInvestment()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT FROM JAY'S DAY MODAL -->
+<div class="overlay" id="importJaysDayModal">
+  <div class="modal">
+    <h2>Import from Jay's Day</h2>
+    <div class="modal-sub">Open Jay's Day, use its Export button, then paste the JSON here. Only "Money" track items with a due date are imported, as one-off bills — nothing syncs automatically.</div>
+    <div class="field">
+      <label>Paste Jay's Day export JSON</label>
+      <textarea id="importJaysDayArea" rows="6" placeholder="Paste exported JSON here…" style="font-family:monospace;font-size:.7rem"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal('importJaysDay')">Cancel</button>
+      <button class="btn" onclick="importFromJaysDay()">Import</button>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM MODAL -->
 <div class="overlay" id="confirmModal">
   <div class="modal" style="max-width:360px">
@@ -685,7 +831,7 @@ let cryptoKey = null; // in-memory only, never persisted
 function load(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
 
 function emptyState() {
-  return { children: {}, routines: [], habits: [], transactions: [], budgets: [], loans: [] };
+  return { children: {}, routines: [], habits: [], transactions: [], budgets: [], loans: [], bills: [], investments: [], dismissedRecurring: [] };
 }
 function fillDefaults(s) {
   s = s || {};
@@ -695,6 +841,9 @@ function fillDefaults(s) {
   s.transactions = s.transactions || [];
   s.budgets = s.budgets || [];
   s.loans = s.loans || [];
+  s.bills = s.bills || [];
+  s.investments = s.investments || [];
+  s.dismissedRecurring = s.dismissedRecurring || [];
   return s;
 }
 
@@ -926,6 +1075,67 @@ function updateHomeTab() {
   document.getElementById('todayRoutines').textContent = todayRoutines;
   document.getElementById('todayIncome').textContent = '$' + income.toFixed(2);
   document.getElementById('todayExpenses').textContent = '$' + expenses.toFixed(2);
+
+  const netWorth = state.investments.reduce((s,i) => s + i.value, 0) - state.loans.reduce((s,l) => s + l.remaining, 0);
+  const netWorthEl = document.getElementById('netWorth');
+  netWorthEl.textContent = (netWorth < 0 ? '-$' : '$') + Math.abs(netWorth).toFixed(2);
+  netWorthEl.className = 'stat-value' + (netWorth >= 0 ? ' positive' : ' negative');
+
+  renderHomeAlerts();
+}
+
+function renderHomeAlerts() {
+  const alerts = [];
+  const now = new Date();
+  const soonCutoff = new Date(now); soonCutoff.setDate(soonCutoff.getDate() + 5);
+  const nowStr = now.toISOString().slice(0,10);
+  const soonStr = soonCutoff.toISOString().slice(0,10);
+
+  state.bills.forEach(b => {
+    const dateLabel = new Date(b.dueDate).toLocaleDateString('en-AU');
+    if (b.dueDate < nowStr) {
+      alerts.push({ icon: '🔴', text: `${escapeHtml(b.name)} was due ${dateLabel} — $${b.amount.toFixed(2)}` });
+    } else if (b.dueDate <= soonStr) {
+      alerts.push({ icon: '🟡', text: `${escapeHtml(b.name)} due ${dateLabel} — $${b.amount.toFixed(2)}` });
+    }
+  });
+
+  const catSpendThisMonth = {};
+  state.transactions.filter(t => t.type === 'expense' && t.date.slice(0,7) === currentMonth).forEach(t => {
+    catSpendThisMonth[t.category] = (catSpendThisMonth[t.category] || 0) + t.amount;
+  });
+  const priorMonths = [];
+  for (let i = 1; i <= 3; i++) {
+    const d = new Date(currentMonth + '-01T00:00:00');
+    d.setMonth(d.getMonth() - i);
+    priorMonths.push(d.toISOString().slice(0,7));
+  }
+  Object.keys(catSpendThisMonth).forEach(cat => {
+    const priorAmounts = priorMonths.map(m =>
+      state.transactions.filter(t => t.type === 'expense' && t.category === cat && t.date.slice(0,7) === m)
+        .reduce((s,t) => s + t.amount, 0)
+    ).filter(a => a > 0);
+    if (!priorAmounts.length) return;
+    const avg = priorAmounts.reduce((s,a) => s + a, 0) / priorAmounts.length;
+    if (avg > 0 && catSpendThisMonth[cat] > avg * 1.5) {
+      alerts.push({ icon: '⚠️', text: `${categoryIcon(cat)} ${escapeHtml(cat)} spending is $${catSpendThisMonth[cat].toFixed(2)} this month, vs ~$${avg.toFixed(2)} usually` });
+    }
+  });
+
+  const section = document.getElementById('alertsSection');
+  const list = document.getElementById('alertsList');
+  if (!alerts.length) {
+    section.style.display = 'none';
+    list.innerHTML = '';
+    return;
+  }
+  section.style.display = 'block';
+  list.innerHTML = alerts.map(a => `
+    <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 18px">
+      <div style="font-size:1.2rem">${a.icon}</div>
+      <div style="font-size:.88rem">${a.text}</div>
+    </div>
+  `).join('');
 }
 
 // ── CHILDREN TAB ────────────────────────────────────────
@@ -1162,6 +1372,76 @@ function updateMoneyTab() {
       `;
     }).join('');
   }
+
+  renderBills();
+  renderInvestments();
+}
+
+function renderBills() {
+  const suggestionsEl = document.getElementById('recurringSuggestions');
+  const candidates = detectRecurringCandidates();
+  suggestionsEl.innerHTML = candidates.map(c => `
+    <div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:14px 18px">
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:.9rem">${categoryIcon(c.category)} Looks recurring: ${escapeHtml(c.desc)}</div>
+        <div style="font-size:.78rem;color:var(--ink-faint)">~$${c.avgAmount.toFixed(2)} · seen ${c.count} times · ${escapeHtml(c.category)}</div>
+      </div>
+      <button class="btn secondary sm" onclick="addRecurringCandidate('${c.key.replace(/'/g, "\\'")}','${c.desc.replace(/'/g, "\\'")}','${c.category}',${c.avgAmount})">Track as bill</button>
+      <button class="btn ghost sm" onclick="dismissRecurringCandidate('${c.key.replace(/'/g, "\\'")}')" aria-label="Dismiss">✕</button>
+    </div>
+  `).join('');
+
+  const billList = document.getElementById('billList');
+  const billEmpty = document.getElementById('billEmpty');
+  if (state.bills.length === 0) {
+    billList.innerHTML = '';
+    billEmpty.style.display = 'block';
+    return;
+  }
+  billEmpty.style.display = 'none';
+  const todayStr = new Date().toISOString().slice(0,10);
+  billList.innerHTML = state.bills.slice().sort((a,b) => a.dueDate < b.dueDate ? -1 : 1).map((b, idx) => {
+    const overdue = b.dueDate < todayStr;
+    return `
+      <div class="budget-item" style="--delay:${idx}">
+        <div class="budget-top">
+          <div>${categoryIcon(b.category)} ${escapeHtml(b.name)}${b.recurring ? ' <span style="font-size:.7rem;color:var(--ink-faint)">(monthly)</span>' : ''}</div>
+          <div style="display:flex;gap:4px">
+            <button class="btn ghost sm" onclick="openModal('bill','${b.id}')" aria-label="Edit">✏️</button>
+            <button class="btn ghost sm" onclick="deleteBill('${b.id}')" aria-label="Delete">🗑</button>
+          </div>
+        </div>
+        <div style="font-size:.8rem;color:${overdue ? 'var(--danger)' : 'var(--ink-faint)'};margin-bottom:10px">
+          $${b.amount.toFixed(2)} · due ${new Date(b.dueDate).toLocaleDateString('en-AU')}${overdue ? ' (overdue)' : ''}
+        </div>
+        <button class="btn sm block" onclick="markBillPaid('${b.id}')">Mark Paid</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderInvestments() {
+  const list = document.getElementById('investmentList');
+  const empty = document.getElementById('investmentEmpty');
+  if (state.investments.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  const typeIcons = { 'Savings': '💰', 'Super / Retirement': '🏛️', 'Shares / ETFs': '📈', 'Property': '🏠', 'Crypto': '🪙', 'Other': '📦' };
+  list.innerHTML = state.investments.map((inv, idx) => `
+    <div class="budget-item" style="--delay:${idx}">
+      <div class="budget-top">
+        <div>${typeIcons[inv.type] || '📦'} ${escapeHtml(inv.name)}</div>
+        <div style="display:flex;gap:4px">
+          <button class="btn ghost sm" onclick="openModal('investment','${inv.id}')" aria-label="Edit">✏️</button>
+          <button class="btn ghost sm" onclick="deleteInvestment('${inv.id}')" aria-label="Delete">🗑</button>
+        </div>
+      </div>
+      <div style="font-size:.8rem;color:var(--ink-faint)">${escapeHtml(inv.type)} · $${inv.value.toFixed(2)}</div>
+    </div>
+  `).join('');
 }
 
 function changeMonth() {
@@ -1175,6 +1455,8 @@ let editingRoutineId = null;
 let editingTxId = null;
 let editingBudgetId = null;
 let editingLoanId = null;
+let editingBillId = null;
+let editingInvestmentId = null;
 
 function openModal(type, id) {
   if (type === 'child') {
@@ -1251,6 +1533,41 @@ function openModal(type, id) {
       document.querySelector('#loanModal h2').textContent = 'Add Loan';
     }
     document.getElementById('loanModal').classList.add('open');
+  } else if (type === 'bill') {
+    editingBillId = id || null;
+    if (id) {
+      const b = state.bills.find(x => x.id === id);
+      document.getElementById('billName').value = b.name;
+      document.getElementById('billAmount').value = b.amount;
+      document.getElementById('billCat').value = b.category;
+      document.getElementById('billDueDate').value = b.dueDate;
+      document.getElementById('billRecurring').checked = !!b.recurring;
+      document.querySelector('#billModal h2').textContent = 'Edit Bill';
+    } else {
+      document.getElementById('billName').value = '';
+      document.getElementById('billAmount').value = '';
+      document.getElementById('billDueDate').value = new Date().toISOString().slice(0,10);
+      document.getElementById('billRecurring').checked = false;
+      document.querySelector('#billModal h2').textContent = 'Add Bill';
+    }
+    document.getElementById('billModal').classList.add('open');
+  } else if (type === 'investment') {
+    editingInvestmentId = id || null;
+    if (id) {
+      const inv = state.investments.find(x => x.id === id);
+      document.getElementById('investName').value = inv.name;
+      document.getElementById('investType').value = inv.type;
+      document.getElementById('investValue').value = inv.value;
+      document.querySelector('#investmentModal h2').textContent = 'Edit Asset';
+    } else {
+      document.getElementById('investName').value = '';
+      document.getElementById('investValue').value = '';
+      document.querySelector('#investmentModal h2').textContent = 'Add Asset';
+    }
+    document.getElementById('investmentModal').classList.add('open');
+  } else if (type === 'importJaysDay') {
+    document.getElementById('importJaysDayArea').value = '';
+    document.getElementById('importJaysDayModal').classList.add('open');
   } else if (type === 'security') {
     document.getElementById('securityModal').classList.add('open');
   } else if (type === 'data') {
@@ -1265,6 +1582,9 @@ function closeModal(type) {
     'transaction': 'transactionModal',
     'budget': 'budgetModal',
     'loan': 'loanModal',
+    'bill': 'billModal',
+    'investment': 'investmentModal',
+    'importJaysDay': 'importJaysDayModal',
     'security': 'securityModal',
     'data': 'dataModal'
   };
@@ -1276,6 +1596,8 @@ function closeModal(type) {
   if (type === 'transaction') editingTxId = null;
   if (type === 'budget') editingBudgetId = null;
   if (type === 'loan') editingLoanId = null;
+  if (type === 'bill') editingBillId = null;
+  if (type === 'investment') editingInvestmentId = null;
 }
 
 function setType(t) {
@@ -1356,7 +1678,7 @@ async function deleteTransaction(id) {
   if (!(await showConfirm('Delete this transaction?'))) return;
   state.transactions = state.transactions.filter(t => t.id !== id);
   persistState();
-  updateMoneyTab();
+  updateAllTabs();
 }
 
 function saveBudget() {
@@ -1414,14 +1736,153 @@ function saveLoan() {
   }
   persistState();
   closeModal('loan');
-  updateMoneyTab();
+  updateAllTabs();
 }
 
 async function deleteLoan(id) {
   if (!(await showConfirm('Delete this loan?'))) return;
   state.loans = state.loans.filter(l => l.id !== id);
   persistState();
+  updateAllTabs();
+}
+
+// ── BILLS & RECURRING PAYMENTS ──────────────────────────
+function saveBill() {
+  const name = document.getElementById('billName').value.trim();
+  const amount = parseFloat(document.getElementById('billAmount').value);
+  const category = document.getElementById('billCat').value;
+  const dueDate = document.getElementById('billDueDate').value;
+  const recurring = document.getElementById('billRecurring').checked;
+  if (!name || !amount || amount <= 0 || !dueDate) return showToast('Please fill in all fields', 'error');
+
+  if (editingBillId) {
+    const b = state.bills.find(x => x.id === editingBillId);
+    b.name = name; b.amount = amount; b.category = category; b.dueDate = dueDate; b.recurring = recurring;
+  } else {
+    state.bills.push({ id: Date.now().toString(), name, amount, category, dueDate, recurring, autoDetected: false });
+  }
+  persistState();
+  closeModal('bill');
+  updateAllTabs();
+}
+
+async function deleteBill(id) {
+  if (!(await showConfirm('Delete this bill?'))) return;
+  state.bills = state.bills.filter(b => b.id !== id);
+  persistState();
+  updateAllTabs();
+}
+
+function markBillPaid(id) {
+  const b = state.bills.find(x => x.id === id);
+  if (!b) return;
+  state.transactions.push({
+    id: Date.now().toString(),
+    type: 'expense',
+    desc: b.name,
+    amount: b.amount,
+    category: b.category,
+    date: new Date().toISOString().slice(0,10)
+  });
+  if (b.recurring) {
+    const d = new Date(b.dueDate + 'T00:00:00');
+    d.setMonth(d.getMonth() + 1);
+    b.dueDate = d.toISOString().slice(0,10);
+  } else {
+    state.bills = state.bills.filter(x => x.id !== id);
+  }
+  persistState();
+  updateAllTabs();
+  showToast('Marked paid — logged as a transaction');
+}
+
+function detectRecurringCandidates() {
+  const groups = {};
+  state.transactions.filter(t => t.type === 'expense').forEach(t => {
+    const key = t.desc.trim().toLowerCase() + '|' + t.category;
+    (groups[key] = groups[key] || []).push(t);
+  });
+  const candidates = [];
+  Object.keys(groups).forEach(key => {
+    const txs = groups[key];
+    const months = new Set(txs.map(t => t.date.slice(0,7)));
+    if (months.size < 2) return;
+    if (state.dismissedRecurring.includes(key)) return;
+    const alreadyTracked = state.bills.some(b => b.name.trim().toLowerCase() === txs[0].desc.trim().toLowerCase());
+    if (alreadyTracked) return;
+    const avgAmount = txs.reduce((s,t) => s + t.amount, 0) / txs.length;
+    candidates.push({ key, desc: txs[0].desc, category: txs[0].category, avgAmount, count: txs.length });
+  });
+  return candidates;
+}
+
+function addRecurringCandidate(key, desc, category, amount) {
+  const nextMonth = new Date();
+  nextMonth.setMonth(nextMonth.getMonth() + 1);
+  state.bills.push({
+    id: Date.now().toString(), name: desc, amount: Math.round(amount * 100) / 100,
+    category, dueDate: nextMonth.toISOString().slice(0,10), recurring: true, autoDetected: true
+  });
+  state.dismissedRecurring.push(key);
+  persistState();
+  updateAllTabs();
+  showToast('Added as a recurring bill');
+}
+
+function dismissRecurringCandidate(key) {
+  state.dismissedRecurring.push(key);
+  persistState();
   updateMoneyTab();
+}
+
+// ── INVESTMENTS & NET WORTH ──────────────────────────────
+function saveInvestment() {
+  const name = document.getElementById('investName').value.trim();
+  const type = document.getElementById('investType').value;
+  const value = parseFloat(document.getElementById('investValue').value);
+  if (!name || isNaN(value) || value < 0) return showToast('Please fill in all fields', 'error');
+
+  if (editingInvestmentId) {
+    const inv = state.investments.find(x => x.id === editingInvestmentId);
+    inv.name = name; inv.type = type; inv.value = value;
+  } else {
+    state.investments.push({ id: Date.now().toString(), name, type, value });
+  }
+  persistState();
+  closeModal('investment');
+  updateAllTabs();
+}
+
+async function deleteInvestment(id) {
+  if (!(await showConfirm('Delete this asset?'))) return;
+  state.investments = state.investments.filter(i => i.id !== id);
+  persistState();
+  updateAllTabs();
+}
+
+// ── IMPORT FROM JAY'S DAY ─────────────────────────────────
+async function importFromJaysDay() {
+  const raw = document.getElementById('importJaysDayArea').value.trim();
+  if (!raw) return showToast('Paste the exported JSON first', 'error');
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch (e) { return showToast("That doesn't look like valid JSON", 'error'); }
+  const items = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.items) ? parsed.items : null);
+  if (!items) return showToast('Could not find an items list in that JSON', 'error');
+
+  const moneyItems = items.filter(i => i && i.section === 'money' && i.due && !i.done);
+  if (!moneyItems.length) return showToast('No open Money items with due dates found', 'error');
+
+  moneyItems.forEach(i => {
+    state.bills.push({
+      id: Date.now().toString() + Math.random().toString(36).slice(2,6),
+      name: String(i.text || 'Imported item'), amount: 0, category: 'Other',
+      dueDate: i.due, recurring: false, autoDetected: false, importedFromJaysDay: true
+    });
+  });
+  persistState();
+  closeModal('importJaysDay');
+  updateAllTabs();
+  showToast('Imported ' + moneyItems.length + ' bill' + (moneyItems.length === 1 ? '' : 's') + ' — set amounts as needed');
 }
 
 // PWA Support
