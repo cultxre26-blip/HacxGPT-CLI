@@ -249,7 +249,9 @@ nav.tabs::-webkit-scrollbar{display:none}
 
 @media(max-width:600px){
   .grid.cards{grid-template-columns:1fr}
-  .tab{padding:8px 14px;font-size:.85rem}
+  .tab{padding:10px 14px;font-size:.85rem}
+  .tab-label{display:none}
+  .tab .ic{font-size:1.25rem}
   header.top{padding:12px 0 8px}
   .section-head{margin:28px 0 18px;flex-wrap:wrap}
   .section-head > div{flex:0 0 100%;display:flex;gap:8px}
@@ -258,7 +260,7 @@ nav.tabs::-webkit-scrollbar{display:none}
   .logo{flex:1;min-width:0}
   .logo .sub{display:none}
   .spacer{display:none}
-  nav.tabs{order:3;flex:0 0 100%;margin-top:10px}
+  nav.tabs{order:3;flex:0 0 100%;margin-top:10px;justify-content:space-between}
 }
 </style>
 </head>
@@ -291,14 +293,17 @@ nav.tabs::-webkit-scrollbar{display:none}
     </div>
     <div class="spacer"></div>
     <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" aria-current="page" data-tab="home">
-        <span class="ic">📍</span> Home
+      <button class="tab" role="tab" aria-current="page" data-tab="home" aria-label="Home">
+        <span class="ic">📍</span> <span class="tab-label">Home</span>
       </button>
-      <button class="tab" role="tab" data-tab="children">
-        <span class="ic">👨‍👩‍👧‍👦</span> Children
+      <button class="tab" role="tab" data-tab="children" aria-label="Children">
+        <span class="ic">👨‍👩‍👧‍👦</span> <span class="tab-label">Children</span>
       </button>
-      <button class="tab" role="tab" data-tab="money">
-        <span class="ic">💰</span> Money
+      <button class="tab" role="tab" data-tab="money" aria-label="Money">
+        <span class="ic">💰</span> <span class="tab-label">Money</span>
+      </button>
+      <button class="tab" role="tab" data-tab="goals" aria-label="Goals">
+        <span class="ic">🎯</span> <span class="tab-label">Goals</span>
       </button>
     </nav>
     <button class="btn ghost sm" onclick="openModal('data')" title="Backup / Restore">⇅</button>
@@ -502,6 +507,25 @@ nav.tabs::-webkit-scrollbar{display:none}
     <p>Add loans to monitor repayments and interest.</p>
   </div>
 
+  <div id="payoffSection" style="display:none">
+    <div class="section-head" style="margin-top:40px">
+      <h2>Debt Payoff Planner</h2>
+    </div>
+    <p style="font-size:.8rem;color:var(--ink-faint);margin:-8px 0 14px">Two common orders people pay off multiple debts in. Neither accounts for exact minimum payments — pick whichever order suits you.</p>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:14px">
+      <div class="card">
+        <h3 style="margin-bottom:4px">🔥 Avalanche</h3>
+        <p style="font-size:.75rem;color:var(--ink-faint);margin-bottom:12px">Highest interest rate first — saves the most on interest overall.</p>
+        <ol id="payoffAvalanche" style="margin:0;padding-left:20px;font-size:.85rem;line-height:1.8"></ol>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:4px">❄️ Snowball</h3>
+        <p style="font-size:.75rem;color:var(--ink-faint);margin-bottom:12px">Smallest balance first — clears debts faster for momentum.</p>
+        <ol id="payoffSnowball" style="margin:0;padding-left:20px;font-size:.85rem;line-height:1.8"></ol>
+      </div>
+    </div>
+  </div>
+
   <div class="section-head" style="margin-top:40px">
     <h2>Investments & Net Worth</h2>
     <button class="btn" onclick="openModal('investment')">+ Add Asset</button>
@@ -526,6 +550,47 @@ nav.tabs::-webkit-scrollbar{display:none}
       <li style="margin-bottom:6px">Time in the market generally matters more than timing the market for long-term goals.</li>
       <li>Review your net worth and spending regularly — small recurring costs compound quietly.</li>
     </ul>
+  </div>
+
+  <div class="section-head" style="margin-top:40px">
+    <h2>Assistance & Support</h2>
+  </div>
+  <div class="card" style="line-height:1.6">
+    <p style="font-size:.8rem;color:var(--ink-faint);margin-bottom:12px;font-weight:600">GENERAL POINTERS — CHECK YOUR OWN GOVERNMENT/COUNCIL SITE FOR ELIGIBILITY</p>
+    <p style="margin-bottom:10px">Programs, amounts, and eligibility change often and vary by country/state — this is a starting list of categories to search for, not a guarantee you qualify.</p>
+    <ul style="margin:0;padding-left:20px;color:var(--ink-soft)">
+      <li style="margin-bottom:6px"><strong>Family/child payments</strong> — search "family tax benefit" or "child benefit" for your country.</li>
+      <li style="margin-bottom:6px"><strong>Child care subsidy</strong> — many countries subsidize a % of care costs for working/studying parents.</li>
+      <li style="margin-bottom:6px"><strong>Rent/housing assistance</strong> — public housing waitlists, rent relief, or bond loan schemes.</li>
+      <li style="margin-bottom:6px"><strong>Utility relief</strong> — energy/water providers often have hardship or concession programs — call and ask.</li>
+      <li style="margin-bottom:6px"><strong>Free financial counseling</strong> — many countries fund free, non-judgmental debt counseling (e.g. Australia's National Debt Helpline) — a real person who can look at your actual numbers.</li>
+      <li>Local community/charity organizations often help with food, school costs, or emergency bills — a local council or community center is usually the fastest way to find out what's available.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- GOALS TAB -->
+<div class="tab-content" id="goals-tab">
+  <div class="section-head">
+    <h2>Savings Goals</h2>
+    <button class="btn" onclick="openModal('savingsGoal')">+ New Goal</button>
+  </div>
+  <div id="savingsGoalList" class="grid cards"></div>
+  <div id="savingsGoalEmpty" class="empty">
+    <div class="em">🎯</div>
+    <h3>No savings goals yet</h3>
+    <p>Set a target — emergency fund, house deposit, holiday — and track your progress toward it.</p>
+  </div>
+
+  <div class="section-head" style="margin-top:40px">
+    <h2>Household Goals</h2>
+    <button class="btn" onclick="openModal('householdGoal')">+ New Goal</button>
+  </div>
+  <div id="householdGoalList" class="grid"></div>
+  <div id="householdGoalEmpty" class="empty">
+    <div class="em">🏡</div>
+    <h3>No household goals yet</h3>
+    <p>Bigger-picture things you're working toward — a routine, a habit, a project — not tied to money.</p>
   </div>
 </div>
 </div>
@@ -747,6 +812,54 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
 </div>
 
+<!-- SAVINGS GOAL MODAL -->
+<div class="overlay" id="savingsGoalModal">
+  <div class="modal">
+    <h2>New Savings Goal</h2>
+    <div class="modal-sub">A target to work toward</div>
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="goalTitle" placeholder="e.g. Emergency fund, House deposit">
+    </div>
+    <div class="field">
+      <label>Target Amount (AUD)</label>
+      <input type="number" id="goalTarget" placeholder="0.00" step="0.01" min="0">
+    </div>
+    <div class="field">
+      <label>Current Amount Saved (AUD)</label>
+      <input type="number" id="goalCurrent" placeholder="0.00" step="0.01" min="0">
+    </div>
+    <div class="field">
+      <label>Target Date (optional)</label>
+      <input type="date" id="goalDate">
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal('savingsGoal')">Cancel</button>
+      <button class="btn" onclick="saveSavingsGoal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOUSEHOLD GOAL MODAL -->
+<div class="overlay" id="householdGoalModal">
+  <div class="modal">
+    <h2>New Household Goal</h2>
+    <div class="modal-sub">A bigger-picture thing you're working toward</div>
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="hGoalTitle" placeholder="e.g. Consistent bedtime routine">
+    </div>
+    <div class="field">
+      <label>Notes (optional)</label>
+      <textarea id="hGoalNotes" rows="3" placeholder="Any detail worth remembering…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal('householdGoal')">Cancel</button>
+      <button class="btn" onclick="saveHouseholdGoal()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- IMPORT FROM JAY'S DAY MODAL -->
 <div class="overlay" id="importJaysDayModal">
   <div class="modal">
@@ -831,7 +944,7 @@ let cryptoKey = null; // in-memory only, never persisted
 function load(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
 
 function emptyState() {
-  return { children: {}, routines: [], habits: [], transactions: [], budgets: [], loans: [], bills: [], investments: [], dismissedRecurring: [] };
+  return { children: {}, routines: [], habits: [], transactions: [], budgets: [], loans: [], bills: [], investments: [], dismissedRecurring: [], savingsGoals: [], householdGoals: [] };
 }
 function fillDefaults(s) {
   s = s || {};
@@ -844,6 +957,8 @@ function fillDefaults(s) {
   s.bills = s.bills || [];
   s.investments = s.investments || [];
   s.dismissedRecurring = s.dismissedRecurring || [];
+  s.savingsGoals = s.savingsGoals || [];
+  s.householdGoals = s.householdGoals || [];
   return s;
 }
 
@@ -1060,6 +1175,7 @@ function updateAllTabs() {
   updateHomeTab();
   updateChildrenTab();
   updateMoneyTab();
+  updateGoalsTab();
 }
 
 // ── HOME TAB ────────────────────────────────────────────
@@ -1375,6 +1491,7 @@ function updateMoneyTab() {
 
   renderBills();
   renderInvestments();
+  renderDebtPayoff();
 }
 
 function renderBills() {
@@ -1444,6 +1561,20 @@ function renderInvestments() {
   `).join('');
 }
 
+function renderDebtPayoff() {
+  const section = document.getElementById('payoffSection');
+  if (state.loans.length < 2) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  const avalanche = state.loans.slice().sort((a,b) => b.rate - a.rate);
+  const snowball = state.loans.slice().sort((a,b) => a.remaining - b.remaining);
+  const item = l => `<li>${escapeHtml(l.name)} — $${l.remaining.toFixed(2)} @ ${l.rate}%</li>`;
+  document.getElementById('payoffAvalanche').innerHTML = avalanche.map(item).join('');
+  document.getElementById('payoffSnowball').innerHTML = snowball.map(item).join('');
+}
+
 function changeMonth() {
   currentMonth = document.getElementById('monthPicker').value;
   updateMoneyTab();
@@ -1457,6 +1588,8 @@ let editingBudgetId = null;
 let editingLoanId = null;
 let editingBillId = null;
 let editingInvestmentId = null;
+let editingSavingsGoalId = null;
+let editingHouseholdGoalId = null;
 
 function openModal(type, id) {
   if (type === 'child') {
@@ -1568,6 +1701,36 @@ function openModal(type, id) {
   } else if (type === 'importJaysDay') {
     document.getElementById('importJaysDayArea').value = '';
     document.getElementById('importJaysDayModal').classList.add('open');
+  } else if (type === 'savingsGoal') {
+    editingSavingsGoalId = id || null;
+    if (id) {
+      const g = state.savingsGoals.find(x => x.id === id);
+      document.getElementById('goalTitle').value = g.title;
+      document.getElementById('goalTarget').value = g.targetAmount;
+      document.getElementById('goalCurrent').value = g.currentAmount;
+      document.getElementById('goalDate').value = g.targetDate || '';
+      document.querySelector('#savingsGoalModal h2').textContent = 'Edit Savings Goal';
+    } else {
+      document.getElementById('goalTitle').value = '';
+      document.getElementById('goalTarget').value = '';
+      document.getElementById('goalCurrent').value = '';
+      document.getElementById('goalDate').value = '';
+      document.querySelector('#savingsGoalModal h2').textContent = 'New Savings Goal';
+    }
+    document.getElementById('savingsGoalModal').classList.add('open');
+  } else if (type === 'householdGoal') {
+    editingHouseholdGoalId = id || null;
+    if (id) {
+      const g = state.householdGoals.find(x => x.id === id);
+      document.getElementById('hGoalTitle').value = g.title;
+      document.getElementById('hGoalNotes').value = g.notes || '';
+      document.querySelector('#householdGoalModal h2').textContent = 'Edit Household Goal';
+    } else {
+      document.getElementById('hGoalTitle').value = '';
+      document.getElementById('hGoalNotes').value = '';
+      document.querySelector('#householdGoalModal h2').textContent = 'New Household Goal';
+    }
+    document.getElementById('householdGoalModal').classList.add('open');
   } else if (type === 'security') {
     document.getElementById('securityModal').classList.add('open');
   } else if (type === 'data') {
@@ -1585,12 +1748,16 @@ function closeModal(type) {
     'bill': 'billModal',
     'investment': 'investmentModal',
     'importJaysDay': 'importJaysDayModal',
+    'savingsGoal': 'savingsGoalModal',
+    'householdGoal': 'householdGoalModal',
     'security': 'securityModal',
     'data': 'dataModal'
   };
   if (modals[type]) {
     document.getElementById(modals[type]).classList.remove('open');
   }
+  if (type === 'savingsGoal') editingSavingsGoalId = null;
+  if (type === 'householdGoal') editingHouseholdGoalId = null;
   if (type === 'child') editingChildId = null;
   if (type === 'routine') editingRoutineId = null;
   if (type === 'transaction') editingTxId = null;
@@ -1883,6 +2050,129 @@ async function importFromJaysDay() {
   closeModal('importJaysDay');
   updateAllTabs();
   showToast('Imported ' + moneyItems.length + ' bill' + (moneyItems.length === 1 ? '' : 's') + ' — set amounts as needed');
+}
+
+// ── GOALS ─────────────────────────────────────────────────
+function saveSavingsGoal() {
+  const title = document.getElementById('goalTitle').value.trim();
+  const targetAmount = parseFloat(document.getElementById('goalTarget').value);
+  const currentAmount = parseFloat(document.getElementById('goalCurrent').value) || 0;
+  const targetDate = document.getElementById('goalDate').value;
+  if (!title || !targetAmount || targetAmount <= 0) return showToast('Please fill in a title and target amount', 'error');
+
+  if (editingSavingsGoalId) {
+    const g = state.savingsGoals.find(x => x.id === editingSavingsGoalId);
+    g.title = title; g.targetAmount = targetAmount; g.currentAmount = currentAmount; g.targetDate = targetDate;
+  } else {
+    state.savingsGoals.push({ id: Date.now().toString(), title, targetAmount, currentAmount, targetDate, createdAt: new Date().toISOString().slice(0,10) });
+  }
+  persistState();
+  closeModal('savingsGoal');
+  updateGoalsTab();
+}
+
+async function deleteSavingsGoal(id) {
+  if (!(await showConfirm('Delete this savings goal?'))) return;
+  state.savingsGoals = state.savingsGoals.filter(g => g.id !== id);
+  persistState();
+  updateGoalsTab();
+}
+
+function saveHouseholdGoal() {
+  const title = document.getElementById('hGoalTitle').value.trim();
+  const notes = document.getElementById('hGoalNotes').value.trim();
+  if (!title) return showToast('Please enter a title', 'error');
+
+  if (editingHouseholdGoalId) {
+    const g = state.householdGoals.find(x => x.id === editingHouseholdGoalId);
+    g.title = title; g.notes = notes;
+  } else {
+    state.householdGoals.push({ id: Date.now().toString(), title, notes, completed: false, createdAt: new Date().toISOString().slice(0,10) });
+  }
+  persistState();
+  closeModal('householdGoal');
+  updateGoalsTab();
+}
+
+async function deleteHouseholdGoal(id) {
+  if (!(await showConfirm('Delete this goal?'))) return;
+  state.householdGoals = state.householdGoals.filter(g => g.id !== id);
+  persistState();
+  updateGoalsTab();
+}
+
+function toggleHouseholdGoal(id) {
+  const g = state.householdGoals.find(x => x.id === id);
+  if (!g) return;
+  g.completed = !g.completed;
+  persistState();
+  updateGoalsTab();
+}
+
+function updateGoalsTab() {
+  renderSavingsGoals();
+  renderHouseholdGoals();
+}
+
+function renderSavingsGoals() {
+  const list = document.getElementById('savingsGoalList');
+  const empty = document.getElementById('savingsGoalEmpty');
+  if (state.savingsGoals.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  const todayStr = new Date().toISOString().slice(0,10);
+  list.innerHTML = state.savingsGoals.map((g, idx) => {
+    const percent = Math.min(100, (g.currentAmount / g.targetAmount) * 100);
+    const remaining = Math.max(0, g.targetAmount - g.currentAmount);
+    let contribHint = '';
+    if (g.targetDate && g.targetDate > todayStr && remaining > 0) {
+      const weeksLeft = Math.max(1, Math.ceil((new Date(g.targetDate) - new Date(todayStr)) / (7 * 86400000)));
+      contribHint = `~$${(remaining / weeksLeft).toFixed(2)}/week to reach it by ${new Date(g.targetDate).toLocaleDateString('en-AU')}`;
+    } else if (remaining === 0) {
+      contribHint = '🎉 Goal reached!';
+    }
+    return `
+      <div class="card" style="--delay:${idx}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-weight:700;font-family:var(--font-head)">${escapeHtml(g.title)}</div>
+          <div style="display:flex;gap:4px">
+            <button class="btn ghost sm" onclick="openModal('savingsGoal','${g.id}')" aria-label="Edit">✏️</button>
+            <button class="btn ghost sm" onclick="deleteSavingsGoal('${g.id}')" aria-label="Delete">🗑</button>
+          </div>
+        </div>
+        <div style="font-size:.85rem;color:var(--ink-faint);margin-bottom:8px">$${g.currentAmount.toFixed(2)} / $${g.targetAmount.toFixed(2)}</div>
+        <div class="budget-bar">
+          <div class="budget-bar-fill" style="width:${percent}%"></div>
+        </div>
+        ${contribHint ? `<div style="font-size:.78rem;color:var(--a1);margin-top:10px">${contribHint}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderHouseholdGoals() {
+  const list = document.getElementById('householdGoalList');
+  const empty = document.getElementById('householdGoalEmpty');
+  if (state.householdGoals.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = state.householdGoals.map((g, idx) => `
+    <div class="routine-item" style="--delay:${idx};align-items:flex-start">
+      <button type="button" class="routine-check${g.completed ? ' done' : ''}" onclick="toggleHouseholdGoal('${g.id}')" aria-label="${g.completed ? 'Mark not done' : 'Mark done'}">${g.completed ? '✓' : ''}</button>
+      <div style="flex:1">
+        <div class="routine-text${g.completed ? ' done' : ''}">${escapeHtml(g.title)}</div>
+        ${g.notes ? `<div style="font-size:.78rem;color:var(--ink-faint);margin-top:2px">${escapeHtml(g.notes)}</div>` : ''}
+      </div>
+      <button type="button" class="routine-del" onclick="openModal('householdGoal','${g.id}')" aria-label="Edit">✏️</button>
+      <button type="button" class="routine-del" onclick="deleteHouseholdGoal('${g.id}')" aria-label="Remove">✕</button>
+    </div>
+  `).join('');
 }
 
 // PWA Support
