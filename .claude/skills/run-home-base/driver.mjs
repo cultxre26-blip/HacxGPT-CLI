@@ -10,7 +10,7 @@
  *   click <selector>           Click an element
  *   type <selector> <text>     Type text into an input
  *   fill-form <field> <value>  Fill a form field (supports nested selectors)
- *   switch-tab <tab>           Switch to a tab (home|children|money)
+ *   switch-tab <tab>           Switch to a tab (home|children|money|goals|daily)
  *   add-child <name> <year>    Add a child to the app
  *   add-transaction <type> <amount> <category> <desc>  Add a transaction
  *   add-routine <childName> <task>                      Add a routine
@@ -25,18 +25,22 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '../../..');
 const HOME_BASE_FILE = path.join(PROJECT_ROOT, 'home-base.html');
+// Persistent profile dir so localStorage survives across separate CLI
+// invocations (each `node driver.mjs <cmd>` is its own process) — without
+// this, chained commands like the Example Workflow below silently lose
+// all state between steps.
+const PROFILE_DIR = path.join(__dirname, '.browser-profile');
 
 let browser, page, context;
 
 async function launchApp(port = 8765) {
-  if (!browser) {
-    browser = await chromium.launch({
+  if (!context) {
+    context = await chromium.launchPersistentContext(PROFILE_DIR, {
       headless: true,
       executablePath: '/opt/pw-browsers/chromium',
       args: ['--disable-blink-features=AutomationControlled']
     });
-    context = await browser.newContext();
-    page = await context.newPage();
+    page = context.pages()[0] || await context.newPage();
   }
 
   const fileUrl = `file://${HOME_BASE_FILE}`;
@@ -44,7 +48,7 @@ async function launchApp(port = 8765) {
   await page.goto(fileUrl, { waitUntil: 'networkidle' });
   console.log('Home Base loaded successfully');
 
-  return { browser, page, context };
+  return { page, context };
 }
 
 async function screenshot(filePath) {
@@ -71,7 +75,7 @@ async function typeText(selector, text) {
 
 async function switchTab(tabName) {
   if (!page) throw new Error('App not launched');
-  const validTabs = ['home', 'children', 'money'];
+  const validTabs = ['home', 'children', 'money', 'goals', 'daily'];
   if (!validTabs.includes(tabName)) throw new Error(`Invalid tab: ${tabName}`);
 
   await page.click(`[data-tab="${tabName}"]`);
@@ -82,7 +86,12 @@ async function switchTab(tabName) {
 async function addChild(name, year) {
   if (!page) throw new Error('App not launched');
 
-  await clickElement('button[onclick="openModal(\'child\')"]');
+  const currentTab = await page.getAttribute('[aria-current="page"]', 'data-tab');
+  if (currentTab !== 'children') {
+    await switchTab('children');
+  }
+
+  await clickElement('#children-tab button[onclick="openModal(\'child\')"]');
   await page.fill('#childName', name);
   await page.fill('#childYear', year.toString());
   await clickElement('button[onclick="saveChild()"]');
@@ -99,7 +108,7 @@ async function addTransaction(type, amount, category, description) {
     await switchTab('money');
   }
 
-  await clickElement('button[onclick="openModal(\'transaction\')"]');
+  await clickElement('#money-tab button[onclick="openModal(\'transaction\')"]');
   await page.waitForSelector(`button[id="type${type.charAt(0).toUpperCase() + type.slice(1)}"]`);
 
   if (type === 'income') {
@@ -127,7 +136,7 @@ async function addRoutine(childName, task) {
     await switchTab('children');
   }
 
-  await clickElement('button[onclick="openModal(\'routine\')"]');
+  await clickElement('#children-tab button[onclick="openModal(\'routine\')"]');
 
   // Get the child ID by finding the child in state
   const state = await page.evaluate(() => JSON.parse(localStorage.getItem('homeBase.v1')));
@@ -144,13 +153,19 @@ async function addRoutine(childName, task) {
 
 async function getState() {
   if (!page) throw new Error('App not launched');
-  const state = await page.evaluate(() => JSON.parse(localStorage.getItem('homeBase.v1')));
-  return state;
+  const raw = await page.evaluate(() => localStorage.getItem('homeBase.v1'));
+  if (!raw) {
+    const hasVault = await page.evaluate(() => !!localStorage.getItem('homeBase.vault'));
+    if (hasVault) {
+      throw new Error("Data is PIN-encrypted (homeBase.vault) — the driver can't read it without the PIN. Unlock in the UI first, or use the in-app Backup/Restore export instead of reading localStorage directly.");
+    }
+    throw new Error('No homeBase.v1 key found — app may not have initialized yet.');
+  }
+  return JSON.parse(raw);
 }
 
 async function cleanup() {
   if (context) await context.close();
-  if (browser) await browser.close();
   console.log('Browser closed');
 }
 
@@ -249,7 +264,7 @@ Commands:
   screenshot <path>                Take screenshot
   click <selector>                 Click element
   type <selector> <text>           Type into input
-  switch-tab <home|children|money> Switch tab
+  switch-tab <home|children|money|goals|daily> Switch tab
   add-child <name> <year>          Add child
   add-transaction <type> <amt> <cat> <desc>   Add transaction
   add-routine <childName> <task>   Add routine

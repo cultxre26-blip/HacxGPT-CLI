@@ -9,3 +9,4 @@ dist/
 .hacx_history
 .pytest_cache/
 node_modules/
+.claude/skills/run-home-base/.browser-profile/

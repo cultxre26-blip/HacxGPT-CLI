@@ -1,344 +1,346 @@
 ---
 name: run-home-base
-description: Launch, screenshot, and drive the Home Base family command center — a unified localStorage-backed PWA combining family routines, children management, and financial tracking
-keywords: [home base, web app, family, pwa, family routines, finance, money tracking]
+description: Launch, screenshot, and drive the Home Base family command center — a bold neubrutalist-styled PWA combining family routines, children management, financial tracking (bills, budgets, loans, investments, debt payoff), savings/household goals, and a cloud-synced daily three-track list
+keywords: [home base, web app, family, pwa, family routines, finance, money tracking, bills, goals]
 ---
 
 # Run Home Base — Family Command Center
 
-**Home Base** is a production-ready single-file HTML5 application that combines family management (children, routines, habits, milestones) with personal finance tracking (transactions, budgets, loans) in one unified, beautiful interface. It's a glass-morphism dark-mode PWA backed by localStorage, with smooth animations and a cohesive design system.
-
-All data is stored on the user's device — no cloud, no servers, no sign-ups.
+**Home Base** is a production single-file HTML5 application combining family
+management (children, routines) with personal finance (transactions, budgets,
+loans, bills with recurring frequency, investments/net worth, a debt payoff
+planner) and goals (savings + household), all in one bold, neubrutalist-styled
+interface — thick borders, hard offset shadows, flat colors, custom SVG icons
+(no emoji), corner background accents. Core data (children, routines,
+transactions, budgets, loans, bills, investments, goals) is local-first,
+stored in `localStorage`, optionally PIN-encrypted on-device. The **Daily**
+tab (a merged-in three-track quick list: Money/House/Her) is the one
+exception — it syncs live across devices via the published Artifact's `db`
+capability.
 
 ## Prerequisites
 
-You'll need:
 - A modern browser (Chrome, Edge, Safari, Firefox) — tested on Chromium 120+
-- Node.js 18+ and npm/yarn (if you want to use the automated driver)
-- Basic file serving (Python, Node, or any static file server)
+- Node.js 18+ (for the automated driver)
+- Playwright (`npm install playwright` — see Driver section)
 
-The app is **zero-build**: it's a single `.html` file with no dependencies — just open it in a browser.
+The app is **zero-build**: a single `.html` file, no external JS/CSS
+dependencies (Google Fonts and Chart.js were both removed during this
+project's life — check before assuming either is still there).
 
 ## Build & Run
 
 ### Option 1: Open Directly (Fastest)
 
-The app file is at `./home-base.html` — open it directly in your browser:
-- Copy the absolute path: `/home/user/HacxGPT-CLI/home-base.html`
-- Paste into your browser's address bar as: `file:///home/user/HacxGPT-CLI/home-base.html`
+```
+file:///home/user/HacxGPT-CLI/home-base.html
+```
 
-### Option 2: Serve Locally (Recommended for Dev)
+### Option 2: Serve Locally
 
-Python 3:
 ```bash
 cd /home/user/HacxGPT-CLI
 python3 -m http.server 8765
+# open http://localhost:8765/home-base.html
 ```
 
-Then open in your browser: `http://localhost:8765/home-base.html`
+### Option 3: The Published Artifact (Daily tab cloud sync only works here)
 
-Node.js with `http-server`:
-```bash
-npm install -g http-server
-cd /home/user/HacxGPT-CLI
-http-server -p 8765
-# Open: http://localhost:8765/home-base.html
-```
+The app is also published as a Claude Artifact at
+`https://claude.ai/artifact/NbXeQf4vuUuuV2Qv3w6wGc` with the `db` capability
+declared. Live cross-device sync for the **Daily** tab only works when
+opened through that URL (or a republish of it) inside a real Claude Artifact
+viewer — `window.claude` doesn't exist under `file://` or a plain static
+host, so the Daily tab silently falls back to local-only storage there
+(this is by design, not a bug — see Gotchas). Declaring `db` also made the
+artifact **organization-internal**, not publicly link-shareable — a platform
+rule, not something this project chose.
 
 ## Agent Path: Automated Driver
 
-The `.claude/skills/run-home-base/driver.mjs` script provides programmatic control for agents to interact with the app in a browser.
+`.claude/skills/run-home-base/driver.mjs` gives programmatic control.
 
-### Prerequisites for Driver
+### Install
 
 ```bash
-npm install playwright --save-dev
+cd /home/user/HacxGPT-CLI
+npm install playwright
 ```
+
+### Important: persistent browser profile
+
+Each `node driver.mjs <command>` invocation is its own process. The driver
+uses `chromium.launchPersistentContext()` against a fixed profile directory
+(`.claude/skills/run-home-base/.browser-profile/`, gitignored) specifically
+so `localStorage` **survives between separate CLI calls** — without this,
+chaining `add-child` then `add-routine` in two separate commands would lose
+all state in between (this was broken until this session's fix; verified by
+re-running the full example workflow below as genuinely separate processes
+and confirming `get-state` shows everything). Delete that directory to reset
+to a clean slate.
 
 ### Driver Commands
 
-The driver launches a Chromium browser (headless or visible), loads the HTML file, and automates interactions:
-
-**Take a screenshot:**
 ```bash
-node .claude/skills/run-home-base/driver.mjs screenshot /tmp/home-base-screenshot.png
-```
+# Screenshot
+node .claude/skills/run-home-base/driver.mjs screenshot /tmp/shot.png
 
-**Switch to a tab:**
-```bash
+# Switch tab — five tabs now: home, children, money, goals, daily
 node .claude/skills/run-home-base/driver.mjs switch-tab money
-node .claude/skills/run-home-base/driver.mjs switch-tab children
-node .claude/skills/run-home-base/driver.mjs switch-tab home
+node .claude/skills/run-home-base/driver.mjs switch-tab goals
+node .claude/skills/run-home-base/driver.mjs switch-tab daily
+
+# Add a child
+node .claude/skills/run-home-base/driver.mjs add-child Emma 2018
+
+# Add a transaction (type amount category description)
+node .claude/skills/run-home-base/driver.mjs add-transaction income 2500 Personal "Monthly salary"
+node .claude/skills/run-home-base/driver.mjs add-transaction expense 45.50 Groceries "Weekly shopping"
+
+# Add a routine for an existing child
+node .claude/skills/run-home-base/driver.mjs add-routine Emma "Brush teeth"
+
+# Print current localStorage state (fails clearly if PIN-locked — see Gotchas)
+node .claude/skills/run-home-base/driver.mjs get-state
+
+# Generic click/type for anything the driver doesn't have a dedicated
+# command for yet (bills, investments, goals, debt payoff, backup/restore,
+# the Daily tab's three add-forms) — inspect the DOM via a screenshot first,
+# then target ids/onclick attributes directly, e.g.:
+node .claude/skills/run-home-base/driver.mjs click "#money-tab button[onclick=\"openModal('bill')\"]"
 ```
 
-**Add a child:**
+Verified this session (genuinely, as separate process invocations, not
+just read from source):
 ```bash
 node .claude/skills/run-home-base/driver.mjs add-child Emma 2018
-node .claude/skills/run-home-base/driver.mjs add-child Noah 2020
-```
-
-**Add a transaction:**
-```bash
-# add-transaction <type> <amount> <category> <description>
-node .claude/skills/run-home-base/driver.mjs add-transaction income 2500 salary "Monthly salary"
-node .claude/skills/run-home-base/driver.mjs add-transaction expense 45.50 groceries "Weekly shopping"
-```
-
-**Add a routine:**
-```bash
 node .claude/skills/run-home-base/driver.mjs add-routine Emma "Brush teeth"
-node .claude/skills/run-home-base/driver.mjs add-routine Noah "Pack backpack"
-```
-
-**Get current state:**
-```bash
+node .claude/skills/run-home-base/driver.mjs add-transaction income 2500 Personal "Monthly salary"
 node .claude/skills/run-home-base/driver.mjs get-state
-```
-
-**Interactive mode (browser stays open):**
-```bash
-node .claude/skills/run-home-base/driver.mjs launch
-# Chromium opens; press Ctrl+C to exit
-```
-
-### Example Workflow
-
-```bash
-# Install dependencies
-npm install playwright
-
-# Start interactive session
-node .claude/skills/run-home-base/driver.mjs launch &
-
-# Switch to children tab
-sleep 2
-node .claude/skills/run-home-base/driver.mjs switch-tab children
-
-# Add sample data
-node .claude/skills/run-home-base/driver.mjs add-child Emma 2018
-node .claude/skills/run-home-base/driver.mjs add-routine Emma "Brush teeth"
-node .claude/skills/run-home-base/driver.mjs switch-tab money
-node .claude/skills/run-home-base/driver.mjs add-transaction income 2500 salary "Monthly salary"
-node .claude/skills/run-home-base/driver.mjs add-transaction expense 45.50 groceries "Weekly shopping"
-
-# Take final screenshot
-node .claude/skills/run-home-base/driver.mjs screenshot /tmp/home-base-demo.png
-
-# Print state
-node .claude/skills/run-home-base/driver.mjs get-state
+# → get-state's children/routines/transactions all present, proving the
+#   persistent-profile fix actually works across process boundaries.
 ```
 
 ## Features
 
 ### Home Tab
-- Daily overview: active children count, routines completed, income/expenses this month
-- Quick action buttons for common workflows
+- Overview stats: active children, routines completed today, month's
+  income/expenses, **Net Worth** (investments − loan balances)
+- 6-month income/expense trend chart (hand-built inline SVG bar chart, no
+  charting library) — hidden until there's at least one transaction
+- "Needs Attention": overdue/upcoming bills and categories spending well
+  above their recent average
+- Quick actions: view Children/Money, add routine/transaction/bill
 
 ### Children Tab
-- Create child profiles with name and birth year
-- Add daily routines (tasks) for each child
-- Visual progress tracking (routines completed/total)
-- Colorful avatar badges per child
+- Child profiles (name, birth year), full edit/delete
+- Routines per child with a real checklist (not just a count badge):
+  toggle done/pending, edit, delete; search + status filter
+- "Routines Done" on Home tab reflects routines completed **today**
+  specifically (tracked via `completedAt`, not just an all-time count)
 
 ### Money Tab
-- Financial dashboard with month picker
-- Income, expense, net balance, and remaining budget stats
-- Transaction log with sorting by date
-- Budget tracking by category (set limits, see spending)
-- Loan tracking (principal, remaining, interest rate)
-- All amounts in AUD by default (easily customizable)
+- Transactions: search + type/category filters, category icons, full edit
+- Budgets per category
+- **Bills & Recurring Payments**: add/edit/delete, due date, **frequency**
+  (none/weekly/fortnightly/monthly/yearly — not just a monthly toggle), a
+  "Mark Paid" button that auto-logs a transaction and advances the due date
+  by the right interval; auto-detects likely recurring charges from
+  transaction history and offers to track them
+- **Loans** and a **Debt Payoff Planner** (appears once 2+ loans exist):
+  avalanche vs snowball ordering, side by side
+- **Investments & Net Worth**: manually-tracked assets (no live price
+  fetching — that would reintroduce an external dependency)
+- **Financial Principles** and **Assistance & Support** panels — explicitly
+  general education / general pointers, not personalized advice
+- **Import From Jay's Day**: one-time paste-JSON import of a *different*
+  app's dated Money-track items as bills (kept for backward compatibility;
+  the live merge is now the Daily tab — see below)
+
+### Goals Tab
+- Savings goals: target/current amount, target date, progress bar, a
+  per-week contribution estimate
+- Household goals: a simple non-money checklist
+
+### Daily Tab (merged from a separate "Jay's Day" artifact)
+- Three tracks — Money / House / Her — each a quick add/toggle/delete list
+  with natural-language due-date parsing ("pay rent by 20 sep", "bins
+  tomorrow")
+- **Cloud-synced** via the `db` capability when opened through the
+  published Artifact URL; falls back to local-only with a visible sync
+  status indicator otherwise
+- "Import From Jay's Day" panel: paste that other app's export JSON for a
+  one-time copy-in (each Artifact has its own isolated database — there is
+  no way for two separately-published Artifacts to share one live
+  collection, so this is a copy, not an ongoing sync)
+
+### Security
+- Optional PIN lock (header lock icon): encrypts the whole local state with
+  AES-GCM (key derived via PBKDF2/SHA-256) instead of storing plain JSON.
+  No recovery if the PIN is forgotten — that's inherent to client-side
+  encryption with no server. The Daily tab's cloud data is unaffected by
+  this lock either way (see Gotchas).
+- Backup/restore via a copyable/pasteable JSON textarea (not a file
+  download — Claude Artifacts block `<a download>` for viewers, so this is
+  the actual working mechanism, not a nicety)
 
 ### Design System
-- Glass-morphism UI with gradient accents
-- Dark mode only (high contrast, low eye strain)
-- Responsive grid layouts (works on mobile, tablet, desktop)
-- Smooth animations and micro-interactions
-- Accessibility: ARIA labels, keyboard navigation, focus management
+- Neubrutalist: flat colors (acid lime, violet, hot pink, red, yellow —
+  no gradients), 3px borders, hard offset shadows (no blur), buttons/cards
+  that visually "press" toward their own shadow on hover/active
+  - This replaced an earlier dark-glass/gradient version — if you see
+    `backdrop-filter`, `var(--grad)`, or `var(--stroke)` anywhere, that's
+    leftover from the old design and should be updated to the current
+    tokens (`--surface`, `--border`, `--shadow*`)
+- Custom hand-built SVG icon set (`icon(name)` JS helper, ~40 icons) —
+  **no emoji anywhere** in the UI; this was a deliberate pass to remove a
+  strongly "generic AI-built app" signal
+- Corner background accents (ring/triangle/square/circle in the app's own
+  accent colors, fixed to the viewport, low opacity) instead of a plain
+  background
+- Responsive: tabs collapse to icon-only under 600px so all five fit
+  without horizontal scroll (this broke once during development when a
+  4th tab was added — verified fixed by checking `scrollWidth <=
+  clientWidth` on the tab nav, not just eyeballing a screenshot)
 
 ## Data Format
 
-All state is stored in a single `homeBase.v1` localStorage key as JSON:
+State lives in `localStorage['homeBase.v1']` as plain JSON, **or** in
+`localStorage['homeBase.vault']` (AES-GCM encrypted) if a PIN is set — in
+that case `homeBase.v1` does not exist and the driver's `get-state` will
+say so explicitly rather than silently returning nothing.
 
 ```json
 {
-  "children": {
-    "1697234567890": {
-      "id": "1697234567890",
-      "name": "Emma",
-      "birthYear": 2018
-    }
-  },
-  "routines": [
-    {
-      "id": "1697234567891",
-      "childId": "1697234567890",
-      "task": "Brush teeth",
-      "completed": false,
-      "date": "2024-01-15"
-    }
-  ],
-  "transactions": [
-    {
-      "id": "1697234567892",
-      "type": "income",
-      "desc": "Monthly salary",
-      "amount": 2500,
-      "category": "salary",
-      "date": "2024-01-01"
-    }
-  ],
-  "budgets": [
-    {
-      "id": "1697234567893",
-      "category": "Groceries",
-      "limit": 500
-    }
-  ],
-  "loans": [
-    {
-      "id": "1697234567894",
-      "name": "Car loan",
-      "total": 25000,
-      "remaining": 18000,
-      "rate": 4.5
-    }
-  ]
+  "children": { "<id>": { "id": "...", "name": "Emma", "birthYear": 2018 } },
+  "routines": [{ "id": "...", "childId": "...", "task": "Brush teeth", "completed": false, "completedAt": "", "date": "2024-01-15" }],
+  "habits": [],
+  "transactions": [{ "id": "...", "type": "income", "desc": "Monthly salary", "amount": 2500, "category": "Personal", "date": "2024-01-01" }],
+  "budgets": [{ "id": "...", "category": "Groceries", "limit": 500 }],
+  "loans": [{ "id": "...", "name": "Car loan", "total": 25000, "remaining": 18000, "rate": 4.5 }],
+  "bills": [{ "id": "...", "name": "Rent", "amount": 1200, "category": "Utilities", "dueDate": "2026-10-01", "frequency": "monthly", "autoDetected": false }],
+  "investments": [{ "id": "...", "name": "Super", "type": "Super / Retirement", "value": 40000 }],
+  "dismissedRecurring": ["spotify|entertainment"],
+  "savingsGoals": [{ "id": "...", "title": "Emergency Fund", "targetAmount": 5000, "currentAmount": 1250, "targetDate": "2026-12-01" }],
+  "householdGoals": [{ "id": "...", "title": "Bedtime routine", "notes": "", "completed": false }]
 }
 ```
 
-**Export/Import:** Use your browser's DevTools console:
-```javascript
-// Export to clipboard
-copy(JSON.stringify(JSON.parse(localStorage.getItem('homeBase.v1')), null, 2))
+The Daily tab's items live separately, in `localStorage['homeBase.daily.v1']`
+as a local cache, and in the Artifact's `db.collection("items")` as the
+source of truth when cloud sync is active — each item:
+`{ id, section: "money"|"house"|"her", text, due, done, doneAt, createdAt }`.
 
-// Import from JSON string
-localStorage.setItem('homeBase.v1', JSON.stringify({...yourData...}))
-```
+**Export/Import (in-app, works regardless of PIN lock):** the header's
+sync icon opens Backup/Restore — a textarea with the full decrypted JSON
+and a Copy button, plus a paste-to-import field. This is the only reliable
+export path for a published Artifact; a DevTools `localStorage` read still
+works when self-hosting via `file://`/a local server.
 
 ## Gotchas
 
-### 1. Driver requires Playwright
-The `driver.mjs` script uses Playwright to automate browser interactions. Install it first:
-```bash
-npm install playwright
-```
-If Playwright fails to install or run, check that Node.js is 18+.
+### 1. Driver needs a persistent profile, and it's gitignored
+See "Important: persistent browser profile" above. If chained commands
+seem to lose state, check `.claude/skills/run-home-base/.browser-profile/`
+actually exists and isn't being deleted between runs.
 
-### 2. Chromium must be in PATH or installed locally
-Playwright bundles Chromium; on first run it downloads (~200MB). Network issues can cause timeout:
-```bash
-# Force re-download
-npm install --force playwright
-```
+### 2. `get-state` can't read PIN-locked data
+If a PIN has been set in the UI, `localStorage['homeBase.v1']` no longer
+exists (data moved to encrypted `homeBase.vault`). `get-state` detects this
+and throws a clear error instead of returning `null` silently — use the
+in-app Backup/Restore export instead, or don't set a PIN on the driver's
+test profile.
 
-### 3. File URLs have limited localStorage on some browsers
-When opening via `file://`, Safari and some Firefox configs sandbox localStorage. Use a local server instead:
-```bash
-python3 -m http.server 8765
-# Open: http://localhost:8765/home-base.html
-```
+### 3. The Daily tab's live cloud sync only works in the real Artifact viewer
+`window.claude` (and therefore `db`) is `undefined` under `file://`, a
+plain local server, or a static host — there is no way around this for
+local dev/testing. The tab still fully works locally in that case (adds/
+edits/deletes all persist to `localStorage['homeBase.daily.v1']`), it just
+shows "Saved on this device only" instead of "Synced across your devices."
+Don't mistake this for a bug when testing via `file://`.
 
-### 4. Data persists only in that browser/domain
-If you open `home-base.html` from two different file paths, or in two browsers, they won't see the same data (separate localStorage). Keep one canonical path or sync manually via export/import.
+### 4. Two separately-published Artifacts can never share one live database
+Each Artifact gets its own isolated `db` store — confirmed against the
+platform's own capability docs before this was built. "Import From Jay's
+Day" (in both the Money tab and Daily tab) is necessarily a one-time copy,
+never an ongoing sync, no matter how it's phrased in the UI.
 
-### 5. Editing modals with click-outside close
-Clicking outside a modal (on the dark overlay) closes it without saving. This is intentional (no accidental submits) but can be surprising on touch devices where the overlay is easier to tap.
+### 5. Ambiguous selectors are a recurring trap in this file
+Several buttons across different tabs share the exact same `onclick`
+attribute (e.g. `openModal('transaction')` appears on both the Home tab's
+"Log Transaction" quick action and the Money tab's own "+ Transaction"
+button — both exist in the DOM at once, just one is `display:none`).
+A bare `button[onclick="..."]` selector will match multiple elements and
+either throw (Playwright strict mode) or silently click the wrong one.
+Always scope to the active tab's container, e.g. `#money-tab
+button[onclick="..."]`. This bit the driver itself (fixed this session)
+and bit ad-hoc test scripts multiple times during this project's
+development — assume any new automation will hit it too.
 
-### 6. Month filter is separate per view
-The Money tab's month picker only affects transactions/budgets shown in that tab. Switching to Home or Children doesn't change it.
+### 6. Legacy field names may appear in older exported/imported JSON
+`bills[].recurring` (boolean) was the field before `frequency` (string:
+none/weekly/fortnightly/monthly/yearly) replaced it. The app normalizes
+this automatically on load/import (`recurring:true` → `frequency:
+"monthly"`), so hand-edited or old exported JSON still works, but don't
+write new code that reads `.recurring` — read `.frequency`.
 
-### 7. Budgets are per-category, not per-month
-A budget for "Groceries" applies to all months. Edit the budget to change its limit; delete and recreate to reset.
+### 7. File URLs sandbox localStorage on some browsers
+Safari and some Firefox configs restrict `file://` localStorage. Use a
+local server (Option 2 above) if data isn't persisting when self-hosting.
+
+### 8. Budgets are per-category, not per-month
+A "Groceries" budget applies to every month. Edit it to change the limit.
 
 ## Troubleshooting
 
 ### "App fails to load" (blank page)
-**Symptom:** Open the `.html` file, page stays blank or shows errors in DevTools console.
-
-**Diagnosis:** Check the browser console (F12 → Console tab). Look for script errors or `Uncaught ReferenceError`.
-
-**Fixes:**
-1. Ensure you're opening the correct file: `./home-base.html` in the repo root
-2. Clear browser cache: Ctrl+Shift+Delete (or Cmd+Shift+Delete on Mac)
-3. Try a different browser (Chrome, Firefox, Edge)
-4. Use a local server instead of file://, as some browsers restrict file:// strict
+Check DevTools console for script errors. Confirm you're opening
+`/home/user/HacxGPT-CLI/home-base.html` specifically (not a stale copy),
+and try a local server instead of `file://`.
 
 ### "localStorage is empty after refresh"
-**Symptom:** Add data, refresh the page, data is gone.
+- Confirm the same file path/origin is used every time (localStorage is
+  per-origin)
+- Not in incognito/private mode
+- Check DevTools → Application → Local Storage for `homeBase.v1` (or
+  `homeBase.vault` if PIN-locked)
 
-**Causes:**
-- File is opened from two different paths (localStorage is per-origin)
-- Browser is in private/incognito mode (localStorage not persisted)
-- Browser storage is full
-
-**Fixes:**
-1. Use the same file path consistently (bookmark it if needed)
-2. Use normal browsing mode, not incognito
-3. Open DevTools (F12) → Application → Local Storage → check `homeBase.v1` key exists
-4. If key exists, try export (copy to clipboard) and restart; if data is there, it's a display bug
-
-### "Driver script fails: 'Cannot find Playwright'"
-**Fix:**
+### Driver: "Cannot find Playwright"
 ```bash
-cd /home/user/HacxGPT-CLI
-npm install playwright
-node .claude/skills/run-home-base/driver.mjs screenshot /tmp/test.png
+cd /home/user/HacxGPT-CLI && npm install playwright
 ```
 
-### "Driver screenshot is blank"
-**Cause:** Page took too long to load (network, slow machine, or JavaScript error).
+### Driver: chained commands don't see earlier commands' data
+Almost always the persistent-profile issue (Gotcha #1) — confirm
+`.browser-profile/` exists between runs and isn't being wiped by some
+outer cleanup script.
 
-**Fix:**
-```bash
-# Add longer timeout by editing driver.mjs, change:
-# await page.goto(fileUrl, { waitUntil: 'networkidle' });
-# to:
-# await page.goto(fileUrl, { waitUntil: 'networkidle', timeout: 10000 });
-```
-
-Or wait longer before capturing:
-```bash
-node .claude/skills/run-home-base/driver.mjs launch
-# Wait 3 seconds for page to fully render
-sleep 3
-node .claude/skills/run-home-base/driver.mjs screenshot /tmp/screenshot.png
-```
-
-### "Can't add data via driver: selector not found"
-**Cause:** Modal or button HTML structure changed, or page didn't load fully.
-
-**Fix:**
-1. Take a screenshot to see current state: `driver.mjs screenshot /tmp/check.png`
-2. Open DevTools (F12) → Elements, find the button or form field
-3. Update the selector in `driver.mjs` to match
-4. Ensure app is fully loaded: wait a moment before running command
-
-### "Budgets/Loans don't update when I add a transaction"
-**Cause:** This is expected — budgets and loans are separate from transactions. You must:
-1. Add transactions in Money tab
-2. Set budgets separately to track spending against limits
-3. Add loans separately to track repayment progress
-
-Budgets show spending **vs. limit** for the current month. Add a budget, then add transactions with matching categories to see the budget bar fill.
+### Driver: "Timeout ... waiting for locator" / "element is not visible"
+The target button is very likely on a different tab than the one active
+by default (Home), and the driver function didn't switch tabs first —
+check whether the function you're calling includes a tab-switch (like
+`addTransaction`/`addRoutine`/`addChild` all now do) before the click, or
+add one. Also check for the ambiguous-selector trap (Gotcha #5).
 
 ## Human Path (Manual)
 
-If you just want to use Home Base normally without automation:
-
-1. Open `home-base.html` in your browser
-2. Use the buttons and forms to add children, routines, transactions, budgets, loans
-3. Click the tabs to navigate between Home, Children, and Money views
-4. Your data saves automatically to localStorage
-
-No command line, no scripts — just click and type.
+1. Open `home-base.html` (or the published Artifact URL) in a browser
+2. Use the five tabs — Home, Children, Money, Goals, Daily
+3. Optionally set a PIN (header lock icon) to encrypt local data at rest
+4. Data saves automatically; use the header sync icon for backup/restore
 
 ## Next Steps
 
-- **Backup data:** Export from DevTools console, save to a file
-- **Share data:** Export, email, import into another device's browser
-- **Customize:** Edit `home-base.html` to change colors, categories, or features
-- **Deploy:** Upload `home-base.html` to any static host (GitHub Pages, Vercel, Netlify) to make it accessible from anywhere
+- **Backup:** header sync icon → copy the export JSON somewhere safe
+  (especially before setting a PIN — there's no recovery if it's forgotten)
+- **Deploy elsewhere:** the file is fully self-contained and portable to
+  any static host; the Daily tab's cloud sync is Artifact-specific and
+  won't follow it — that tab degrades to local-only elsewhere
+- **Customize:** colors/shadows live in the `:root` CSS custom properties
+  near the top of the file; icons live in the `ICON_PATHS` JS object
 
 ---
 
-Built with glass-morphism design, localStorage persistence, and zero external dependencies. Pure HTML + CSS + JavaScript.
+Neubrutalist design, custom SVG icons, local-first with optional PIN
+encryption, one cloud-synced tab. Pure HTML + CSS + JavaScript, verified
+end-to-end with Playwright throughout its development.
