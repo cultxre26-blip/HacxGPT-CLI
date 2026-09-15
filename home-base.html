@@ -42,8 +42,15 @@ body{
   letter-spacing:-.005em;position:relative;overflow-x:hidden;scroll-behavior:smooth;
   background-image:
     linear-gradient(var(--border-dim) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border-dim) 1px, transparent 1px);
-  background-size:28px 28px;background-position:-1px -1px;background-attachment:fixed;
+    linear-gradient(90deg, var(--border-dim) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Ccircle cx='210' cy='210' r='190' fill='none' stroke='%237a5cff' stroke-width='30' opacity='.28'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cpolygon points='180,20 340,320 20,320' fill='%23ff5c9e' opacity='.16'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Crect x='40' y='40' width='240' height='240' fill='none' stroke='%23c3ff3d' stroke-width='24' transform='rotate(15 160 160)' opacity='.22'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='380'%3E%3Ccircle cx='190' cy='190' r='150' fill='%23ffcc00' opacity='.14'/%3E%3C/svg%3E");
+  background-size:28px 28px,28px 28px,420px 420px,360px 360px,320px 320px,380px 380px;
+  background-position:-1px -1px,-1px -1px,-260px -260px,calc(100% + 240px) -240px,-220px calc(100% + 220px),calc(100% + 280px) calc(100% + 280px);
+  background-repeat:repeat,repeat,no-repeat,no-repeat,no-repeat,no-repeat;
+  background-attachment:fixed;
   background-color:var(--bg);
 }
 h1,h2,h3,h4{margin:0;font-family:var(--font-head);font-weight:900;letter-spacing:-.01em;color:var(--ink);text-rendering:optimizeLegibility}
@@ -185,6 +192,9 @@ nav.tabs::-webkit-scrollbar{display:none}
 .routine-del svg{width:14px;height:14px}
 .routine-del:hover{color:var(--danger)}
 .routine-empty{font-size:.8rem;color:var(--ink-faint);padding:6px 2px}
+.item-due{font-size:.7rem;color:var(--ink-faint);margin-top:2px;font-family:var(--font-head);font-weight:700;text-transform:uppercase}
+.item-due.over{color:var(--danger)}
+.item-due.soon{color:var(--warn)}
 
 #confirmModal{z-index:150}
 .overlay{position:fixed;inset:0;background:rgba(8,7,12,.8);
@@ -276,6 +286,9 @@ nav.tabs::-webkit-scrollbar{display:none}
       </button>
       <button class="tab" role="tab" data-tab="goals" aria-label="Goals">
         <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></span> <span class="tab-label">Goals</span>
+      </button>
+      <button class="tab" role="tab" data-tab="daily" aria-label="Daily">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4.5" width="16" height="15" rx="2"/><path d="M8 9.5l2.2 2.2L15.5 7"/><path d="M8 15h8"/></svg></span> <span class="tab-label">Daily</span>
       </button>
     </nav>
     <button class="btn ghost sm" onclick="openModal('data')" title="Backup / Restore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 8 0 0 1 14-4.6M4 10V5M4 10h5"/><path d="M20 14a8 8 0 0 1-14 4.6M20 14v5m0-5h-5"/></svg></button>
@@ -577,6 +590,64 @@ nav.tabs::-webkit-scrollbar{display:none}
     <h3>No household goals yet</h3>
     <p>Bigger-picture things you're working toward — a routine, a habit, a project — not tied to money.</p>
   </div>
+</div>
+
+<!-- DAILY TAB (merged from Jay's Day — synced across devices via cloud db) -->
+<div class="tab-content" id="daily-tab">
+  <div class="section-head">
+    <h2>Daily</h2>
+  </div>
+  <p id="dailySyncStatus" style="font-size:.8rem;color:var(--ink-faint);margin:-8px 0 16px;font-weight:700;text-transform:uppercase;display:flex;align-items:center;gap:6px">
+    <span id="dailySyncDot" style="width:8px;height:8px;border-radius:50%;background:var(--ink-faint);flex:none"></span>
+    <span id="dailySyncText">Connecting…</span>
+  </p>
+
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+    <section class="card">
+      <div class="section-head" style="margin:0 0 4px">
+        <h3 style="flex:1;display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:3px;background:var(--a1);flex:none"></span>Money</h3>
+        <span id="daily-count-money" style="font-size:.75rem;color:var(--ink-faint);font-weight:700">—</span>
+      </div>
+      <ul class="routine-list" id="daily-list-money"></ul>
+      <form class="filter-bar" style="margin-top:10px" data-daily-section="money" onsubmit="return false">
+        <input type="text" class="filter-input" placeholder="Bill, payment, saving…" maxlength="120" autocomplete="off">
+        <button class="btn sm" type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="section-head" style="margin:0 0 4px">
+        <h3 style="flex:1;display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:3px;background:var(--a3);flex:none"></span>House</h3>
+        <span id="daily-count-house" style="font-size:.75rem;color:var(--ink-faint);font-weight:700">—</span>
+      </div>
+      <ul class="routine-list" id="daily-list-house"></ul>
+      <form class="filter-bar" style="margin-top:10px" data-daily-section="house" onsubmit="return false">
+        <input type="text" class="filter-input" placeholder="Setup, admin, repair…" maxlength="120" autocomplete="off">
+        <button class="btn sm" type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="section-head" style="margin:0 0 4px">
+        <h3 style="flex:1;display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:3px;background:var(--a2);flex:none"></span>Her</h3>
+        <span id="daily-count-her" style="font-size:.75rem;color:var(--ink-faint);font-weight:700">—</span>
+      </div>
+      <ul class="routine-list" id="daily-list-her"></ul>
+      <form class="filter-bar" style="margin-top:10px" data-daily-section="her" onsubmit="return false">
+        <input type="text" class="filter-input" placeholder="Daycare, appointment, needs…" maxlength="120" autocomplete="off">
+        <button class="btn sm" type="submit">Add</button>
+      </form>
+    </section>
+  </div>
+
+  <div class="section-head" style="margin-top:32px">
+    <h2>Import From Jay's Day</h2>
+  </div>
+  <p style="font-size:.85rem;color:var(--ink-faint);margin:-8px 0 12px">One-time only — artifacts each keep their own database, so this copies items in rather than staying live-linked. Open Jay's Day, tap Export, paste the JSON below.</p>
+  <div class="field">
+    <textarea id="dailyImportArea" rows="4" placeholder="Paste Jay's Day export JSON here…" style="font-family:monospace;font-size:.7rem"></textarea>
+  </div>
+  <button class="btn secondary" onclick="importDailyFromJaysDay()">Import Items</button>
 </div>
 </div>
 
@@ -2266,6 +2337,243 @@ function renderHouseholdGoals() {
       <button type="button" class="routine-del" onclick="deleteHouseholdGoal('${g.id}')" aria-label="Remove">${icon('close')}</button>
     </div>
   `).join('');
+}
+
+// ── DAILY TAB (cloud-synced, merged from Jay's Day) ─────
+const DAILY_SECTIONS = ['money', 'house', 'her'];
+let dailyStore = null;
+let dailyItems = [];
+const DAILY_LS_KEY = 'homeBase.daily.v1';
+
+function loadDailyLocal() {
+  try {
+    const raw = localStorage.getItem(DAILY_LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return [];
+}
+function saveDailyLocal() {
+  try { localStorage.setItem(DAILY_LS_KEY, JSON.stringify(dailyItems)); } catch (e) {}
+}
+function newDailyId() {
+  return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+const DAILY_MONTHS = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, sept:8, oct:9, nov:10, dec:11 };
+const DAILY_DAYS = { sun:0, mon:1, tue:2, tues:2, wed:3, thu:4, thur:4, thurs:4, fri:5, sat:6 };
+function dailyMidnight(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function dailyIso(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+
+function parseDailyDue(raw) {
+  const text = raw.trim();
+  const today = dailyMidnight(new Date());
+  let found = null, matched = '';
+
+  let m = text.match(/\b(\d{1,2})\s*(?:\/|-)\s*(\d{1,2})(?:\s*(?:\/|-)\s*(\d{2,4}))?\b/);
+  if (m) {
+    const yr = m[3] ? (m[3].length === 2 ? 2000 + parseInt(m[3],10) : parseInt(m[3],10)) : today.getFullYear();
+    const cand = new Date(yr, parseInt(m[2],10) - 1, parseInt(m[1],10));
+    if (!isNaN(cand)) { found = cand; matched = m[0]; }
+  }
+  if (!found) {
+    m = text.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sept|sep|oct|nov|dec)[a-z]*\b/i);
+    if (m) {
+      const mo = DAILY_MONTHS[m[2].toLowerCase()];
+      const c = new Date(today.getFullYear(), mo, parseInt(m[1],10));
+      if (c < today) c.setFullYear(c.getFullYear() + 1);
+      found = c; matched = m[0];
+    }
+  }
+  if (!found) {
+    m = text.match(/\b(today|tomorrow|tonight)\b/i);
+    if (m) {
+      const c2 = new Date(today);
+      if (m[1].toLowerCase() === 'tomorrow') c2.setDate(c2.getDate() + 1);
+      found = c2; matched = m[0];
+    }
+  }
+  if (!found) {
+    m = text.match(/\b(next\s+)?(sun|mon|tues|tue|wed|thurs|thur|thu|fri|sat)[a-z]*\b/i);
+    if (m) {
+      const target = DAILY_DAYS[m[2].toLowerCase()];
+      const c3 = new Date(today);
+      let delta = (target - c3.getDay() + 7) % 7;
+      if (delta === 0) delta = 7;
+      if (m[1]) delta += 7;
+      c3.setDate(c3.getDate() + delta);
+      found = c3; matched = m[0];
+    }
+  }
+  if (!found) return null;
+  const cleaned = text.replace(matched, '').replace(/\s+(by|due|on|before)\s*$/i, '').replace(/\s{2,}/g, ' ').trim();
+  return { due: dailyIso(found), text: cleaned || text };
+}
+
+function dailyDaysUntil(dueStr) {
+  if (!dueStr) return null;
+  const p = dueStr.split('-');
+  const d = new Date(+p[0], +p[1]-1, +p[2]);
+  return Math.round((dailyMidnight(d) - dailyMidnight(new Date())) / 86400000);
+}
+function dailyDueLabel(dueStr) {
+  const n = dailyDaysUntil(dueStr);
+  if (n === null) return '';
+  if (n < -1) return Math.abs(n) + ' days overdue';
+  if (n === -1) return '1 day overdue';
+  if (n === 0) return 'today';
+  if (n === 1) return 'tomorrow';
+  const p = dueStr.split('-');
+  return new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString('en-AU', n <= 7 ? { weekday: 'long' } : { day: 'numeric', month: 'short' });
+}
+
+function setDailySync(mode, text) {
+  const dot = document.getElementById('dailySyncDot');
+  const label = document.getElementById('dailySyncText');
+  if (!dot) return;
+  dot.style.background = mode === 'synced' ? 'var(--a1)' : 'var(--warn)';
+  label.textContent = text;
+}
+
+function persistDaily(item, remove) {
+  if (dailyStore) {
+    const ref = dailyStore.doc('items/' + item.id);
+    (remove ? ref.delete() : ref.set({
+      section: item.section, text: item.text, due: item.due || '',
+      done: !!item.done, doneAt: item.doneAt || '', createdAt: item.createdAt
+    })).catch(() => setDailySync('local', 'Saved on this device only — sync failed'));
+  }
+  saveDailyLocal();
+}
+
+function addDailyItem(section, raw) {
+  const text = raw.trim();
+  if (!text) return;
+  const parsed = parseDailyDue(text);
+  const item = {
+    id: newDailyId(), section,
+    text: parsed ? parsed.text : text,
+    due: parsed ? parsed.due : '',
+    done: false, doneAt: '', createdAt: new Date().toISOString()
+  };
+  dailyItems.push(item);
+  persistDaily(item, false);
+  renderDaily();
+}
+function toggleDailyItem(id) {
+  const it = dailyItems.find(x => x.id === id);
+  if (!it) return;
+  it.done = !it.done;
+  it.doneAt = it.done ? new Date().toISOString() : '';
+  persistDaily(it, false);
+  renderDaily();
+}
+async function removeDailyItem(id) {
+  if (!(await showConfirm('Delete this item?'))) return;
+  const it = dailyItems.find(x => x.id === id);
+  if (!it) return;
+  dailyItems = dailyItems.filter(x => x.id !== id);
+  persistDaily(it, true);
+  renderDaily();
+}
+
+function dailySortFn(a, b) {
+  if (a.done !== b.done) return a.done ? 1 : -1;
+  if (a.due && b.due) return a.due < b.due ? -1 : (a.due > b.due ? 1 : 0);
+  if (a.due) return -1;
+  if (b.due) return 1;
+  return (a.createdAt || '') < (b.createdAt || '') ? -1 : 1;
+}
+
+function renderDaily() {
+  DAILY_SECTIONS.forEach(sec => {
+    const list = document.getElementById('daily-list-' + sec);
+    if (!list) return;
+    const mine = dailyItems.filter(i => i.section === sec).sort(dailySortFn);
+    if (!mine.length) {
+      list.innerHTML = '<li class="routine-empty">Nothing here yet.</li>';
+    } else {
+      list.innerHTML = mine.map(it => {
+        const n = dailyDaysUntil(it.due);
+        const dueClass = n !== null && n < 0 ? 'over' : (n !== null && n <= 1 ? 'soon' : '');
+        return `
+          <li class="routine-item" style="align-items:flex-start">
+            <button type="button" class="routine-check${it.done ? ' done' : ''}" onclick="toggleDailyItem('${it.id}')" aria-label="${it.done ? 'Mark not done' : 'Mark done'}">${it.done ? icon('check') : ''}</button>
+            <div style="flex:1;min-width:0">
+              <div class="routine-text${it.done ? ' done' : ''}">${escapeHtml(it.text)}</div>
+              ${it.due && !it.done ? `<div class="item-due ${dueClass}">${dailyDueLabel(it.due)}</div>` : ''}
+            </div>
+            <button type="button" class="routine-del" onclick="removeDailyItem('${it.id}')" aria-label="Remove">${icon('close')}</button>
+          </li>
+        `;
+      }).join('');
+    }
+    const open = mine.filter(i => !i.done).length;
+    const countEl = document.getElementById('daily-count-' + sec);
+    if (countEl) countEl.textContent = open + ' open';
+  });
+}
+
+async function importDailyFromJaysDay() {
+  const raw = document.getElementById('dailyImportArea').value.trim();
+  if (!raw) return showToast('Paste the exported JSON first', 'error');
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch (e) { return showToast("That doesn't look like valid JSON", 'error'); }
+  const items = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.items) ? parsed.items : null);
+  if (!items) return showToast('Could not find an items list in that JSON', 'error');
+
+  let count = 0;
+  items.forEach(i => {
+    if (!i || !DAILY_SECTIONS.includes(i.section)) return;
+    const item = {
+      id: newDailyId(), section: i.section, text: String(i.text || 'Imported item'),
+      due: String(i.due || ''), done: !!i.done, doneAt: String(i.doneAt || ''),
+      createdAt: String(i.createdAt || new Date().toISOString())
+    };
+    dailyItems.push(item);
+    persistDaily(item, false);
+    count++;
+  });
+  document.getElementById('dailyImportArea').value = '';
+  renderDaily();
+  showToast('Imported ' + count + ' item' + (count === 1 ? '' : 's'));
+}
+
+document.querySelectorAll('form[data-daily-section]').forEach(form => {
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const input = form.querySelector('input');
+    addDailyItem(form.getAttribute('data-daily-section'), input.value);
+    input.value = '';
+  });
+});
+
+dailyItems = loadDailyLocal();
+renderDaily();
+setDailySync('local', 'Connecting…');
+
+if (window.claude && typeof window.claude.use === 'function') {
+  window.claude.use('db').then(db => {
+    if (!db) { setDailySync('local', 'Saved on this device only'); return; }
+    dailyStore = db;
+    db.collection('items').onSnapshot(snap => {
+      const next = [];
+      snap.docs.forEach(d => {
+        const v = d.data() || {};
+        next.push({
+          id: d.id,
+          section: DAILY_SECTIONS.includes(v.section) ? v.section : 'house',
+          text: String(v.text || ''), due: String(v.due || ''),
+          done: !!v.done, doneAt: String(v.doneAt || ''), createdAt: String(v.createdAt || '')
+        });
+      });
+      dailyItems = next;
+      saveDailyLocal();
+      renderDaily();
+      setDailySync('synced', 'Synced across your devices');
+    }, () => setDailySync('local', 'Saved on this device only — lost connection'));
+  }).catch(() => setDailySync('local', 'Saved on this device only'));
+} else {
+  setDailySync('local', 'Saved on this device only');
 }
 
 // PWA Support
