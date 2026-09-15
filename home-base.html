@@ -114,6 +114,13 @@ nav.tabs::-webkit-scrollbar{display:none}
 .stat-sub{font-size:.78rem;color:var(--ink-faint)}
 .stat-value.positive{color:var(--a1)}
 .stat-value.negative{color:var(--danger)}
+.stat-card{border-top-width:6px}
+.stat-card.accent-income{border-top-color:var(--a1)}
+.stat-card.accent-expense{border-top-color:var(--danger)}
+.stat-card.accent-neutral{border-top-color:var(--ink)}
+.stat-card.accent-purple{border-top-color:var(--a2)}
+.stat-card.accent-pink{border-top-color:var(--a3)}
+.stat-card.accent-warn{border-top-color:var(--warn)}
 
 .tx-item{padding:11px 14px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);background:var(--surface);
   display:flex;align-items:center;justify-content:space-between;gap:10px;transition:transform .15s var(--ease);animation:slideInRight .25s var(--ease) backwards}
@@ -302,27 +309,27 @@ nav.tabs::-webkit-scrollbar{display:none}
     <h2>Today's Overview</h2>
   </div>
   <div class="grid cards">
-    <div class="stat-card" style="--delay:0">
+    <div class="stat-card accent-purple" style="--delay:0">
       <div class="stat-label">Active Children</div>
       <div class="stat-value" id="todayChildren">0</div>
       <div class="stat-sub">tracking today</div>
     </div>
-    <div class="stat-card" style="--delay:1">
+    <div class="stat-card accent-pink" style="--delay:1">
       <div class="stat-label">Routines Done</div>
       <div class="stat-value" id="todayRoutines">0</div>
       <div class="stat-sub">completed</div>
     </div>
-    <div class="stat-card" style="--delay:2">
+    <div class="stat-card accent-income" style="--delay:2">
       <div class="stat-label">Month's Income</div>
       <div class="stat-value positive" id="todayIncome">$0.00</div>
       <div class="stat-sub">this month</div>
     </div>
-    <div class="stat-card" style="--delay:3">
+    <div class="stat-card accent-expense" style="--delay:3">
       <div class="stat-label">Month's Expenses</div>
       <div class="stat-value negative" id="todayExpenses">$0.00</div>
       <div class="stat-sub">this month</div>
     </div>
-    <div class="stat-card" style="--delay:4">
+    <div class="stat-card accent-warn" style="--delay:4">
       <div class="stat-label">Net Worth</div>
       <div class="stat-value" id="netWorth">$0.00</div>
       <div class="stat-sub" id="netWorthLabel">assets − loans</div>
@@ -412,22 +419,22 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
 
   <div class="grid cards">
-    <div class="stat-card">
+    <div class="stat-card accent-income">
       <div class="stat-label">Income</div>
       <div class="stat-value positive" id="statIncome">$0.00</div>
       <div class="stat-sub">this month</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card accent-expense">
       <div class="stat-label">Expenses</div>
       <div class="stat-value negative" id="statExpenses">$0.00</div>
       <div class="stat-sub" id="statExpenseCount">0 transactions</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card accent-neutral">
       <div class="stat-label">Net Balance</div>
       <div class="stat-value" id="statNet">$0.00</div>
       <div class="stat-sub" id="statNetLabel">positive</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card accent-purple">
       <div class="stat-label">Budget Remaining</div>
       <div class="stat-value" id="statBudget">$0.00</div>
       <div class="stat-sub" id="statBudgetLabel">untracked</div>
