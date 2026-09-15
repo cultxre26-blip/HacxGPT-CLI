@@ -169,6 +169,12 @@ nav.tabs::-webkit-scrollbar{display:none}
 .empty h3{margin-bottom:8px;font-size:1.3rem;color:var(--ink)}
 .empty p{color:var(--ink-faint);max-width:400px;margin:0 auto 20px}
 
+.trend-legend{display:flex;gap:18px;margin-bottom:12px}
+.trend-legend-item{display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--ink-soft);font-weight:500}
+.trend-swatch{width:10px;height:10px;border-radius:3px;flex:none}
+.trend-baseline{stroke:var(--stroke);stroke-width:1}
+.trend-axis-label{fill:var(--ink-faint);font-size:9px;font-family:var(--font)}
+
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
   background:linear-gradient(180deg,rgba(30,26,46,.97),rgba(20,17,32,.97));border:1px solid var(--stroke-strong);
   color:var(--ink);padding:12px 20px;border-radius:12px;font-size:.88rem;box-shadow:var(--shadow-lg);
@@ -341,6 +347,19 @@ nav.tabs::-webkit-scrollbar{display:none}
       <div class="stat-label">Net Worth</div>
       <div class="stat-value" id="netWorth">$0.00</div>
       <div class="stat-sub" id="netWorthLabel">assets − loans</div>
+    </div>
+  </div>
+
+  <div id="trendSection" style="display:none">
+    <div class="section-head" style="margin-top:40px">
+      <h2>6-Month Trend</h2>
+    </div>
+    <div class="card">
+      <div class="trend-legend">
+        <span class="trend-legend-item"><span class="trend-swatch" style="background:var(--a1)"></span>Income</span>
+        <span class="trend-legend-item"><span class="trend-swatch" style="background:var(--danger)"></span>Expenses</span>
+      </div>
+      <div id="trendChart" role="img"></div>
     </div>
   </div>
 
@@ -1198,6 +1217,67 @@ function updateHomeTab() {
   netWorthEl.className = 'stat-value' + (netWorth >= 0 ? ' positive' : ' negative');
 
   renderHomeAlerts();
+  renderTrendChart();
+}
+
+function renderTrendChart() {
+  const section = document.getElementById('trendSection');
+  if (state.transactions.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(currentMonth + '-01T00:00:00');
+    d.setMonth(d.getMonth() - i);
+    months.push(d.toISOString().slice(0,7));
+  }
+
+  const data = months.map(m => {
+    const txs = state.transactions.filter(t => t.date.slice(0,7) === m);
+    return {
+      month: m,
+      label: new Date(m + '-01T00:00:00').toLocaleDateString('en-AU', { month: 'short' }),
+      income: txs.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0),
+      expense: txs.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0)
+    };
+  });
+
+  const maxVal = Math.max(1, ...data.map(d => Math.max(d.income, d.expense)));
+  const niceMax = Math.ceil(maxVal / 100) * 100 || 100;
+
+  const W = 600, H = 180, padBottom = 24, padTop = 10;
+  const plotH = H - padBottom - padTop;
+  const groupW = W / data.length;
+  const barW = 22, barGap = 3;
+
+  const bars = data.map((d, i) => {
+    const groupX = i * groupW + groupW / 2;
+    const incH = (d.income / niceMax) * plotH;
+    const expH = (d.expense / niceMax) * plotH;
+    const incX = groupX - barW - barGap / 2;
+    const expX = groupX + barGap / 2;
+    const incY = H - padBottom - incH;
+    const expY = H - padBottom - expH;
+    return `
+      <rect x="${incX}" y="${incY}" width="${barW}" height="${Math.max(0, incH)}" rx="4" fill="var(--a1)">
+        <title>${d.label}: Income $${d.income.toFixed(2)}</title>
+      </rect>
+      <rect x="${expX}" y="${expY}" width="${barW}" height="${Math.max(0, expH)}" rx="4" fill="var(--danger)">
+        <title>${d.label}: Expenses $${d.expense.toFixed(2)}</title>
+      </rect>
+      <text x="${groupX}" y="${H - 6}" text-anchor="middle" class="trend-axis-label">${d.label}</text>
+    `;
+  }).join('');
+
+  document.getElementById('trendChart').innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="xMidYMid meet" aria-label="Monthly income and expenses, last 6 months">
+      <line x1="0" y1="${H - padBottom}" x2="${W}" y2="${H - padBottom}" class="trend-baseline" />
+      ${bars}
+    </svg>
+  `;
 }
 
 function renderHomeAlerts() {
