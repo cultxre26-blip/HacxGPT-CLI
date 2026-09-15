@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0c0a14">
 <title>Home Base — Family Command Center</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='90' font-weight='bold'>🏡</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c3ff3d'><rect width='24' height='24' rx='4' fill='%23100f16'/><path d='M12 4L4 10.5V20H9.5V14C9.5 12.6193 10.6193 11.5 12 11.5C13.3807 11.5 14.5 12.6193 14.5 14V20H20V10.5L12 4Z'/></svg>">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,23 +14,21 @@
 <style>
 :root{
   color-scheme: dark;
-  --bg:#0c0a14;
-  --ink:#f3f1fa; --ink-soft:#b7b2cc; --ink-faint:#8480a0;
-  --glass:rgba(255,255,255,.055);
-  --glass-2:rgba(255,255,255,.09);
-  --glass-hover:rgba(255,255,255,.10);
-  --stroke:rgba(255,255,255,.12);
-  --stroke-strong:rgba(255,255,255,.20);
-  --a1:#6ee7c7; --a2:#7c9cff; --a3:#b98cff;
-  --grad:linear-gradient(135deg,var(--a1) 0%,var(--a2) 52%,var(--a3) 100%);
-  --grad-soft:linear-gradient(135deg,rgba(110,231,199,.18),rgba(124,156,255,.18) 55%,rgba(185,140,255,.18));
-  --danger:#ff8080; --danger-soft:rgba(255,90,90,.16);
-  --success:#a3e635;
-  --radius:22px; --radius-lg:28px; --radius-sm:15px; --radius-xs:12px;
-  --shadow:0 2px 6px rgba(0,0,0,.35), 0 18px 46px -18px rgba(0,0,0,.7);
-  --shadow-lg:0 30px 80px -24px rgba(0,0,0,.8);
-  --glow:0 0 0 1px rgba(255,255,255,.05), 0 12px 40px -12px rgba(124,156,255,.5);
-  --ring:0 0 0 3px rgba(124,156,255,.55);
+  --bg:#100f16;
+  --surface:#1c1a26;
+  --surface-2:#242130;
+  --ink:#f7f4ec; --ink-soft:#c9c4dd; --ink-faint:#8d87a8;
+  --border:#f7f4ec; --border-dim:#4a4560;
+  --a1:#c3ff3d; --a2:#7a5cff; --a3:#ff5c9e;
+  --danger:#ff4444; --danger-soft:rgba(255,68,68,.16);
+  --warn:#ffcc00;
+  --success:#c3ff3d;
+  --bw:3px;
+  --radius:12px; --radius-lg:16px; --radius-sm:9px; --radius-xs:7px;
+  --shadow:6px 6px 0 0 var(--border);
+  --shadow-sm:4px 4px 0 0 var(--border);
+  --shadow-lg:9px 9px 0 0 var(--border);
+  --ring:0 0 0 3px var(--a2);
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,sans-serif;
   --font-head:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,sans-serif;
   --ease:cubic-bezier(.4,0,.2,1);
@@ -40,224 +38,192 @@
 html,body{margin:0;padding:0}
 body{
   font-family:var(--font);color:var(--ink);background:var(--bg);
-  line-height:1.6;-webkit-font-smoothing:antialiased;font-size:16px;min-height:100vh;
+  line-height:1.5;-webkit-font-smoothing:antialiased;font-size:16px;min-height:100vh;
   letter-spacing:-.005em;position:relative;overflow-x:hidden;scroll-behavior:smooth;
+  background-image:
+    linear-gradient(var(--border-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-dim) 1px, transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px;background-attachment:fixed;
+  background-color:var(--bg);
 }
-body::before{
-  content:"";position:fixed;inset:-20% -20% -20% -20%;z-index:-2;pointer-events:none;
-  background:
-    radial-gradient(38% 44% at 12% 8%, rgba(124,156,255,.42), transparent 70%),
-    radial-gradient(40% 42% at 88% 6%, rgba(185,140,255,.38), transparent 68%),
-    radial-gradient(46% 50% at 78% 92%, rgba(110,231,199,.30), transparent 70%),
-    radial-gradient(40% 46% at 22% 96%, rgba(124,156,255,.24), transparent 72%);
-  filter:blur(20px);animation:drift 24s var(--ease) infinite alternate;
-}
-@keyframes drift{
-  0%{transform:translate3d(0,0,0) scale(1)}
-  50%{transform:translate3d(2%,-2%,0) scale(1.06)}
-  100%{transform:translate3d(-2%,2%,0) scale(1.03)}
-}
-body::after{
-  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
-}
-h1,h2,h3,h4{margin:0;font-family:var(--font-head);font-weight:800;letter-spacing:-.03em;color:var(--ink);text-rendering:optimizeLegibility}
-h1{font-size:1.35rem} h2{font-size:1.3rem;font-weight:750} h3{font-size:1.12rem;font-weight:700}
+h1,h2,h3,h4{margin:0;font-family:var(--font-head);font-weight:900;letter-spacing:-.01em;color:var(--ink);text-rendering:optimizeLegibility}
+h1{font-size:1.4rem;text-transform:uppercase} h2{font-size:1.15rem;text-transform:uppercase;letter-spacing:.01em} h3{font-size:1.05rem}
 p{margin:0}
-button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;transition:all .2s var(--ease)}
-:focus-visible{outline:none;box-shadow:var(--ring);border-radius:12px}
-.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;transition:transform .12s var(--ease),box-shadow .12s var(--ease)}
+:focus-visible{outline:none;box-shadow:var(--ring);border-radius:6px}
+.grad-text{color:var(--a1)}
+.ic{display:inline-flex;width:1em;height:1em;flex:none;vertical-align:-.15em}
+.ic svg{width:100%;height:100%}
 
 .app{max-width:920px;margin:0 auto;padding:0 16px 100px}
 header.top{position:sticky;top:0;z-index:20;padding:12px 0 10px;
-  background:linear-gradient(180deg,rgba(12,10,20,.92),rgba(12,10,20,.5));
-  backdrop-filter:saturate(1.3) blur(16px);-webkit-backdrop-filter:saturate(1.3) blur(16px);
-  border-bottom:1px solid var(--stroke);animation:headerIn .3s var(--ease)}
+  background:var(--bg);border-bottom:var(--bw) solid var(--border);animation:headerIn .3s var(--ease)}
 @keyframes headerIn{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
 .top-row{display:flex;align-items:center;gap:12px;max-width:920px;margin:0 auto;padding:0 16px}
 .logo{display:flex;align-items:center;gap:14px}
-.logo .mark{width:48px;height:48px;border-radius:16px;background:var(--grad);display:grid;place-items:center;
-  color:#0c0a14;font-size:22px;flex-shrink:0;box-shadow:0 8px 24px -6px rgba(124,156,255,.7),inset 0 1px 0 rgba(255,255,255,.5);animation:markPulse 2s var(--ease) infinite}
-@keyframes markPulse{0%,100%{box-shadow:0 8px 24px -6px rgba(124,156,255,.7),inset 0 1px 0 rgba(255,255,255,.5)}50%{box-shadow:0 12px 32px -4px rgba(124,156,255,.9),inset 0 1px 0 rgba(255,255,255,.6)}}
+.logo .mark{width:48px;height:48px;border-radius:var(--radius-sm);background:var(--a1);display:grid;place-items:center;
+  color:#100f16;flex-shrink:0;border:var(--bw) solid var(--border);box-shadow:var(--shadow-sm)}
 .logo .text{display:flex;flex-direction:column;gap:2px}
-.logo .title{font-family:var(--font-head);font-weight:700;font-size:1.1rem;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
-.logo .sub{font-size:.65rem;color:var(--ink-faint);font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.logo .title{font-family:var(--font-head);font-weight:900;font-size:1.15rem;color:var(--ink);white-space:nowrap;text-transform:uppercase;letter-spacing:-.01em}
+.logo .sub{font-size:.65rem;color:var(--ink-faint);font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .spacer{flex:1}
-nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:7px;scrollbar-width:none;background:var(--glass);
-  border:1px solid var(--stroke);border-radius:999px;width:fit-content;
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;padding:4px;scrollbar-width:none;background:var(--surface);
+  border:var(--bw) solid var(--border);border-radius:var(--radius);width:fit-content;box-shadow:var(--shadow-sm)}
 nav.tabs::-webkit-scrollbar{display:none}
-.tab{display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:999px;font-family:var(--font-head);
-  font-weight:600;font-size:.92rem;color:var(--ink-soft);white-space:nowrap;transition:all .25s var(--ease);cursor:pointer;position:relative}
-.tab:hover{color:var(--ink);transform:translateY(-2px)}
-.tab[aria-current="page"]{background:var(--grad);color:#0c0a14;box-shadow:0 8px 20px -6px rgba(124,156,255,.6);font-weight:700}
-.tab .ic{font-size:1.1rem;line-height:1;display:inline-block;transition:transform .3s var(--spring)}
-.tab:hover .ic{transform:scale(1.15) rotate(5deg)}
-.tab[aria-current="page"] .ic{animation:iconBounce .4s var(--spring)}
-@keyframes iconBounce{0%{transform:scale(1) translateY(0)}50%{transform:scale(1.2) translateY(-4px)}100%{transform:scale(1) translateY(0)}}
+.tab{display:flex;align-items:center;gap:8px;padding:9px 20px;border-radius:var(--radius-sm);font-family:var(--font-head);
+  font-weight:700;font-size:.88rem;color:var(--ink-soft);white-space:nowrap;transition:all .15s var(--ease);cursor:pointer;position:relative;text-transform:uppercase}
+.tab:hover{color:var(--ink)}
+.tab[aria-current="page"]{background:var(--a1);color:#100f16;border:2px solid var(--border);font-weight:800}
+.tab .ic{line-height:1;display:inline-flex;width:18px;height:18px}
+.tab .ic svg{width:100%;height:100%}
 
 .section-head{display:flex;align-items:center;gap:12px;margin:28px 0 16px;animation:fadeInUp .4s var(--ease) backwards}
-.section-head h2{flex:1;font-size:1.4rem;letter-spacing:-.03em}
+.section-head h2{flex:1}
 .grid{display:grid;gap:14px;animation:fadeInUp .4s var(--ease) backwards}
 .grid.cards{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 
-.card{background:var(--glass);border:1px solid var(--stroke);border-radius:var(--radius);box-shadow:var(--shadow);
-  padding:16px;backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
-  transition:all .3s var(--spring);position:relative;overflow:hidden;cursor:default;animation:cardIn .5s var(--ease) backwards}
-@keyframes cardIn{from{transform:translateY(20px) scale(.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
-.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 40%);opacity:.7}
-.card:hover{border-color:var(--stroke-strong);box-shadow:var(--glow);transform:translateY(-4px)}
+.card{background:var(--surface);border:var(--bw) solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:16px;transition:transform .15s var(--ease),box-shadow .15s var(--ease);position:relative;cursor:default;animation:cardIn .4s var(--ease) backwards}
+@keyframes cardIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.card:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 0 var(--border)}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:12px;
-  font-family:var(--font-head);font-weight:600;font-size:.95rem;color:#0c0a14;background:var(--grad);
-  box-shadow:0 8px 22px -8px rgba(124,156,255,.7),inset 0 1px 0 rgba(255,255,255,.4);
-  transition:all .25s var(--spring);position:relative;overflow:hidden}
-.btn::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
-  transform:translateX(-100%);transition:transform .6s}
-.btn:hover{transform:translateY(-3px);box-shadow:0 12px 28px -6px rgba(124,156,255,.8),inset 0 1px 0 rgba(255,255,255,.5);filter:brightness(1.08)}
-.btn:hover::before{transform:translateX(100%)}
-.btn:active{transform:translateY(-1px)}
-.btn.secondary{background:var(--glass-2);color:var(--ink);border:1px solid var(--stroke-strong);box-shadow:none}
-.btn.secondary:hover{background:var(--glass-hover);border-color:var(--a2);transform:translateY(-2px)}
-.btn.ghost{background:transparent;color:var(--ink-soft);box-shadow:none;padding:8px 14px}
-.btn.ghost:hover{background:var(--glass);color:var(--ink);transform:translateY(-1px)}
-.btn.danger{background:linear-gradient(135deg,#ff9a8b,#ff6a6a);box-shadow:0 8px 22px -8px rgba(255,90,90,.6)}
-.btn.danger:hover{transform:translateY(-3px);box-shadow:0 12px 28px -6px rgba(255,90,90,.7)}
-.btn.sm{padding:8px 16px;font-size:.85rem;border-radius:11px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:var(--radius-sm);
+  font-family:var(--font-head);font-weight:800;font-size:.9rem;color:#100f16;background:var(--a1);
+  border:var(--bw) solid var(--border);box-shadow:var(--shadow-sm);text-transform:uppercase;letter-spacing:.01em}
+.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 0 var(--border)}
+.btn:active{transform:translate(4px,4px);box-shadow:0 0 0 0 var(--border)}
+.btn.secondary{background:var(--surface-2);color:var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink-soft);box-shadow:none;border-color:transparent;padding:8px 10px}
+.btn.ghost:hover{background:var(--surface-2);color:var(--ink);transform:none;box-shadow:none}
+.btn.danger{background:var(--danger);color:#100f16}
+.btn.sm{padding:7px 14px;font-size:.8rem}
 .btn.block{width:100%}
 
-.stat-card{padding:15px;border:1px solid var(--stroke);border-radius:var(--radius-sm);background:var(--glass);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:all .3s var(--spring);position:relative;overflow:hidden;animation:cardIn .5s var(--ease) backwards}
-.stat-card:hover{border-color:var(--stroke-strong);transform:translateY(-3px);box-shadow:var(--glow)}
-.stat-card::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.04),transparent);pointer-events:none}
-.stat-label{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;font-family:var(--font-head);font-weight:600}
-.stat-value{font-family:var(--font-head);font-size:2rem;font-weight:800;margin-bottom:4px;animation:statNumberIn .6s var(--spring) backwards}
-@keyframes statNumberIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.stat-sub{font-size:.8rem;color:var(--ink-faint);opacity:.8}
-.stat-value.positive{background:linear-gradient(135deg,#6ee7c7,#a3e635);-webkit-background-clip:text;background-clip:text;color:transparent}
-.stat-value.negative{background:linear-gradient(135deg,#ff8080,#ff6a6a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-card{padding:15px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);background:var(--surface);
+  box-shadow:var(--shadow-sm);transition:transform .15s var(--ease),box-shadow .15s var(--ease);position:relative;animation:cardIn .4s var(--ease) backwards}
+.stat-card:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 0 var(--border)}
+.stat-label{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;font-family:var(--font-head);font-weight:800}
+.stat-value{font-family:var(--font-head);font-size:1.9rem;font-weight:900;margin-bottom:4px}
+.stat-sub{font-size:.78rem;color:var(--ink-faint)}
+.stat-value.positive{color:var(--a1)}
+.stat-value.negative{color:var(--danger)}
 
-.tx-item{padding:11px 14px;border:1px solid var(--stroke);border-radius:var(--radius-sm);background:var(--glass);
-  display:flex;align-items:center;justify-content:space-between;gap:10px;transition:all .2s var(--ease);animation:slideInRight .3s var(--ease) backwards}
-@keyframes slideInRight{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
-.tx-item:hover{border-color:var(--stroke-strong);background:var(--glass-hover);transform:translateX(4px)}
-.tx-left{display:flex;align-items:center;gap:12px;flex:1}
-.tx-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:var(--glass-2);transition:all .2s var(--ease)}
-.tx-item:hover .tx-icon{transform:scale(1.1);background:var(--glass-hover)}
-.tx-icon.income{background:rgba(163,230,53,.12)}
-.tx-icon.expense{background:rgba(248,113,113,.12)}
-.tx-name{font-size:.9rem;font-weight:500;color:var(--ink)}
+.tx-item{padding:11px 14px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);background:var(--surface);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;transition:transform .15s var(--ease);animation:slideInRight .25s var(--ease) backwards}
+@keyframes slideInRight{from{transform:translateX(-16px);opacity:0}to{transform:translateX(0);opacity:1}}
+.tx-item:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 0 var(--border)}
+.tx-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.tx-icon{width:38px;height:38px;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid var(--border)}
+.tx-icon svg{width:18px;height:18px}
+.tx-icon.income{background:var(--a1);color:#100f16}
+.tx-icon.expense{background:var(--danger);color:#100f16}
+.tx-name{font-size:.9rem;font-weight:700;color:var(--ink)}
 .tx-meta{font-size:.75rem;color:var(--ink-faint);margin-top:2px;font-family:var(--font-head)}
-.tx-right{text-align:right;font-family:var(--font-head);font-weight:600;font-size:1rem}
-.tx-amount.income{background:linear-gradient(135deg,#6ee7c7,#a3e635);-webkit-background-clip:text;background-clip:text;color:transparent}
-.tx-amount.expense{background:linear-gradient(135deg,#ff8080,#ff6a6a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tx-right{text-align:right;font-family:var(--font-head);font-weight:800;font-size:1rem}
+.tx-amount.income{color:var(--a1)}
+.tx-amount.expense{color:var(--danger)}
 
-.budget-item{padding:12px 14px;border:1px solid var(--stroke);border-radius:var(--radius-sm);background:var(--glass);
-  transition:all .2s var(--ease);animation:slideInRight .3s var(--ease) backwards}
-.budget-item:hover{border-color:var(--stroke-strong);background:var(--glass-hover)}
-.budget-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:600}
-.budget-bar{height:7px;background:var(--stroke);border-radius:4px;overflow:hidden;margin-top:10px;position:relative}
-.budget-bar-fill{height:100%;border-radius:4px;background:var(--grad);transition:width .4s var(--spring);position:relative}
-.budget-bar-fill.over{background:linear-gradient(90deg,#ff8080,#ff6a6a)}
-.budget-bar-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.2),transparent);animation:shimmer 2s infinite}
-@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.budget-item{padding:12px 14px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);background:var(--surface);
+  transition:transform .15s var(--ease);animation:slideInRight .25s var(--ease) backwards}
+.budget-item:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 0 var(--border)}
+.budget-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700}
+.budget-bar{height:10px;background:var(--surface-2);border-radius:var(--radius-xs);overflow:hidden;margin-top:10px;position:relative;border:2px solid var(--border)}
+.budget-bar-fill{height:100%;background:var(--a1);transition:width .3s var(--ease)}
+.budget-bar-fill.over{background:var(--danger)}
 
-.empty{text-align:center;padding:64px 24px;color:var(--ink-soft);animation:fadeIn .4s var(--ease)}
-.empty .em{font-size:3.6rem;margin-bottom:16px;filter:drop-shadow(0 6px 20px rgba(124,156,255,.3));animation:float 3s var(--ease) infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.empty h3{margin-bottom:8px;font-size:1.3rem;color:var(--ink)}
+.empty{text-align:center;padding:56px 24px;color:var(--ink-soft);animation:fadeIn .3s var(--ease)}
+.empty .em{width:56px;height:56px;margin:0 auto 16px;color:var(--ink-faint)}
+.empty .em svg{width:100%;height:100%}
+.empty h3{margin-bottom:8px;font-size:1.1rem;color:var(--ink);text-transform:uppercase}
 .empty p{color:var(--ink-faint);max-width:400px;margin:0 auto 20px}
 
 .trend-legend{display:flex;gap:18px;margin-bottom:12px}
-.trend-legend-item{display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--ink-soft);font-weight:500}
-.trend-swatch{width:10px;height:10px;border-radius:3px;flex:none}
-.trend-baseline{stroke:var(--stroke);stroke-width:1}
+.trend-legend-item{display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--ink-soft);font-weight:700;text-transform:uppercase}
+.trend-swatch{width:12px;height:12px;border-radius:3px;flex:none;border:2px solid var(--border)}
+.trend-baseline{stroke:var(--border-dim);stroke-width:1}
 .trend-axis-label{fill:var(--ink-faint);font-size:9px;font-family:var(--font)}
 
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
-  background:linear-gradient(180deg,rgba(30,26,46,.97),rgba(20,17,32,.97));border:1px solid var(--stroke-strong);
-  color:var(--ink);padding:12px 20px;border-radius:12px;font-size:.88rem;box-shadow:var(--shadow-lg);
-  opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:300;max-width:88vw;text-align:center;
-  backdrop-filter:blur(16px)}
+  background:var(--surface);border:var(--bw) solid var(--border);
+  color:var(--ink);padding:12px 20px;border-radius:var(--radius-sm);font-size:.88rem;box-shadow:var(--shadow-sm);
+  opacity:0;pointer-events:none;transition:all .2s var(--ease);z-index:300;max-width:88vw;text-align:center;font-weight:700}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.error{border-color:var(--danger);color:var(--danger)}
 
 .lock-overlay{position:fixed;inset:0;z-index:200;background:var(--bg);display:grid;place-items:center;padding:20px}
-.lock-box{max-width:340px;width:100%;text-align:center;background:var(--glass);border:1px solid var(--stroke);
-  border-radius:var(--radius-lg);padding:32px 24px;backdrop-filter:blur(20px);animation:cardIn .4s var(--ease)}
-.lock-icon{font-size:2.4rem;margin-bottom:12px}
+.lock-box{max-width:340px;width:100%;text-align:center;background:var(--surface);border:var(--bw) solid var(--border);
+  border-radius:var(--radius-lg);padding:32px 24px;box-shadow:var(--shadow-lg);animation:cardIn .3s var(--ease)}
+.lock-icon{width:48px;height:48px;margin:0 auto 12px;color:var(--a1)}
+.lock-icon svg{width:100%;height:100%}
 .lock-sub{color:var(--ink-faint);font-size:.9rem;margin:6px 0 20px;line-height:1.5}
-.lock-box input{width:100%;padding:12px 14px;border:1px solid var(--stroke-strong);border-radius:12px;
-  background:rgba(255,255,255,.04);color:var(--ink);font-size:1rem;text-align:center;letter-spacing:.3em;
+.lock-box input{width:100%;padding:12px 14px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);
+  background:var(--surface-2);color:var(--ink);font-size:1rem;text-align:center;letter-spacing:.3em;
   margin-bottom:12px;font-family:inherit}
-.lock-box input:focus{outline:none;border-color:var(--a2);box-shadow:0 0 0 3px rgba(124,156,255,.1)}
-.lock-error{color:var(--danger);font-size:.85rem;margin-bottom:12px}
+.lock-box input:focus{outline:none;box-shadow:var(--shadow-sm)}
+.lock-error{color:var(--danger);font-size:.85rem;margin-bottom:12px;font-weight:700}
 
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.filter-input{flex:1;min-width:160px;padding:10px 14px;border:1px solid var(--stroke-strong);border-radius:12px;
-  background:var(--glass-2);color:var(--ink);font-family:var(--font);font-size:.9rem;transition:all .2s var(--ease)}
+.filter-input{flex:1;min-width:160px;padding:10px 14px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);
+  background:var(--surface-2);color:var(--ink);font-family:var(--font);font-size:.9rem}
 .filter-input::placeholder{color:var(--ink-faint)}
-.filter-input:focus{outline:none;border-color:var(--a2);box-shadow:0 0 0 3px rgba(124,156,255,.1)}
-.filter-select{padding:10px 12px;border:1px solid var(--stroke-strong);border-radius:12px;background:var(--glass-2);
-  color:var(--ink);font-family:var(--font);font-size:.85rem;cursor:pointer;transition:all .2s var(--ease)}
-.filter-select:focus{outline:none;border-color:var(--a2)}
+.filter-input:focus{outline:none;box-shadow:var(--shadow-sm)}
+.filter-select{padding:10px 12px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);
+  color:var(--ink);font-family:var(--font);font-size:.85rem;cursor:pointer}
+.filter-select:focus{outline:none;box-shadow:var(--shadow-sm)}
 
 .routine-list{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .routine-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-xs);
-  background:var(--glass-2);transition:all .2s var(--ease)}
-.routine-item:hover{background:var(--glass-hover)}
-.routine-check{width:18px;height:18px;border-radius:6px;border:1.5px solid var(--stroke-strong);background:transparent;
-  cursor:pointer;flex:none;color:transparent;font-size:11px;display:flex;align-items:center;justify-content:center;
-  padding:0;transition:all .2s var(--spring)}
-.routine-check:hover{border-color:var(--a2)}
-.routine-check.done{background:var(--grad);border-color:transparent;color:#0c0a14}
+  background:var(--surface-2);border:2px solid var(--border-dim)}
+.routine-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);background:transparent;
+  cursor:pointer;flex:none;color:transparent;display:flex;align-items:center;justify-content:center;
+  padding:0}
+.routine-check svg{width:12px;height:12px}
+.routine-check.done{background:var(--a1);border-color:var(--border);color:#100f16}
 .routine-text{flex:1;font-size:.85rem;min-width:0;word-break:break-word}
 .routine-text.done{color:var(--ink-faint);text-decoration:line-through}
-.routine-del{border:none;background:transparent;color:var(--ink-faint);cursor:pointer;font-size:11px;padding:2px 4px;flex:none}
+.routine-del{border:none;background:transparent;color:var(--ink-faint);cursor:pointer;padding:2px 4px;flex:none;display:flex}
+.routine-del svg{width:14px;height:14px}
 .routine-del:hover{color:var(--danger)}
 .routine-empty{font-size:.8rem;color:var(--ink-faint);padding:6px 2px}
 
 #confirmModal{z-index:150}
-.overlay{position:fixed;inset:0;background:rgba(6,5,12,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  display:grid;place-items:center;z-index:50;padding:16px;overflow-y:auto;animation:overlayIn .25s var(--ease);display:none}
+.overlay{position:fixed;inset:0;background:rgba(8,7,12,.8);
+  display:grid;place-items:center;z-index:50;padding:16px;overflow-y:auto;animation:overlayIn .2s var(--ease);display:none}
 .overlay.open{display:grid}
-.modal{background:linear-gradient(180deg,rgba(30,26,46,.95),rgba(20,17,32,.95));border:1px solid var(--stroke-strong);
+.modal{background:var(--surface);border:var(--bw) solid var(--border);
   border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:440px;padding:22px;margin:auto;
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);animation:modalIn .3s var(--spring);max-height:90vh;overflow-y:auto}
-@keyframes overlayIn{from{opacity:0;backdrop-filter:blur(0px)}to{opacity:1;backdrop-filter:blur(8px)}}
-@keyframes modalIn{from{opacity:0;transform:translateY(24px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
-.modal h2{margin-bottom:6px;font-size:1.4rem;letter-spacing:-.03em}
+  animation:modalIn .2s var(--spring);max-height:90vh;overflow-y:auto}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal h2{margin-bottom:6px}
 .modal .modal-sub{color:var(--ink-faint);font-size:.9rem;margin-bottom:24px;font-weight:500}
-.field{margin-bottom:12px;animation:fadeInUp .3s var(--ease) backwards}
-.field label{display:block;font-family:var(--font-head);font-weight:600;font-size:.85rem;margin-bottom:8px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em}
-.field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1px solid var(--stroke-strong);border-radius:12px;
-  font-family:inherit;font-size:.95rem;color:var(--ink);background:rgba(255,255,255,.04);transition:all .2s var(--ease)}
+.field{margin-bottom:12px;animation:fadeInUp .25s var(--ease) backwards}
+.field label{display:block;font-family:var(--font-head);font-weight:800;font-size:.8rem;margin-bottom:8px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);
+  font-family:inherit;font-size:.95rem;color:var(--ink);background:var(--surface-2)}
 .field textarea{resize:vertical;min-height:90px}
-.field select option{background:#1a1728;color:var(--ink)}
+.field select option{background:var(--surface-2);color:var(--ink)}
 .field input::placeholder,.field textarea::placeholder{color:var(--ink-faint)}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--a2);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(124,156,255,.1)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;box-shadow:var(--shadow-sm)}
 .modal-actions{display:flex;gap:10px;margin-top:18px}
-.modal-actions button{flex:1;animation:fadeIn .3s var(--ease) backwards}
+.modal-actions button{flex:1;animation:fadeIn .25s var(--ease) backwards}
 
 .type-toggle{display:flex;gap:8px}
-.type-btn{flex:1;padding:12px;border:1px solid var(--stroke-strong);border-radius:12px;background:var(--glass-2);
-  color:var(--ink-soft);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s var(--ease);position:relative}
-.type-btn:hover{background:var(--glass-hover);border-color:var(--a2);transform:translateY(-2px)}
-.type-btn.active.income-btn{background:rgba(163,230,53,.15);border-color:var(--a1);color:var(--a1);box-shadow:0 0 0 2px rgba(110,231,199,.2);animation:typeToggle .3s var(--spring)}
-.type-btn.active.expense-btn{background:rgba(248,113,113,.15);border-color:var(--danger);color:var(--danger);box-shadow:0 0 0 2px rgba(255,128,128,.2);animation:typeToggle .3s var(--spring)}
-@keyframes typeToggle{from{transform:scale(.9)}to{transform:scale(1)}}
+.type-btn{flex:1;padding:12px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);
+  color:var(--ink-soft);cursor:pointer;font-size:.85rem;font-weight:800;position:relative;text-transform:uppercase}
+.type-btn.active.income-btn{background:var(--a1);color:#100f16}
+.type-btn.active.expense-btn{background:var(--danger);color:#100f16}
 
-.tab-content{display:none;animation:fadeIn .3s var(--ease)}
+.tab-content{display:none;animation:fadeIn .25s var(--ease)}
 .tab-content.active{display:block}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes fadeInUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeInUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
 
 @media(max-width:600px){
   .grid.cards{grid-template-columns:1fr}
-  .tab{padding:10px 14px;font-size:.85rem}
+  .tab{padding:10px 12px;font-size:.85rem}
   .tab-label{display:none}
-  .tab .ic{font-size:1.25rem}
+  .tab .ic{width:20px;height:20px}
   header.top{padding:12px 0 8px}
   .section-head{margin:28px 0 18px;flex-wrap:wrap}
   .section-head > div{flex:0 0 100%;display:flex;gap:8px}
@@ -274,7 +240,7 @@ nav.tabs::-webkit-scrollbar{display:none}
 
 <div class="lock-overlay" id="lockOverlay" style="display:none">
   <div class="lock-box">
-    <div class="lock-icon">🔒</div>
+    <div class="lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></div>
     <h2>Home Base is locked</h2>
     <p class="lock-sub">Enter your PIN to decrypt your data. It's only ever stored on this device.</p>
     <input type="password" id="lockPin" placeholder="PIN" inputmode="numeric" autocomplete="off">
@@ -300,20 +266,20 @@ nav.tabs::-webkit-scrollbar{display:none}
     <div class="spacer"></div>
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" aria-current="page" data-tab="home" aria-label="Home">
-        <span class="ic">📍</span> <span class="tab-label">Home</span>
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5L12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1V11.5z"/></svg></span> <span class="tab-label">Home</span>
       </button>
       <button class="tab" role="tab" data-tab="children" aria-label="Children">
-        <span class="ic">👨‍👩‍👧‍👦</span> <span class="tab-label">Children</span>
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="7" r="2.6"/><circle cx="16" cy="7" r="2.6"/><path d="M2.5 20v-2c0-2.5 2.5-4.2 5.5-4.2s5.5 1.7 5.5 4.2v2"/><path d="M10.5 20v-1.6c0-2.2 2.3-3.9 5.5-3.9s5.5 1.7 5.5 3.9V20"/></svg></span> <span class="tab-label">Children</span>
       </button>
       <button class="tab" role="tab" data-tab="money" aria-label="Money">
-        <span class="ic">💰</span> <span class="tab-label">Money</span>
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg></span> <span class="tab-label">Money</span>
       </button>
       <button class="tab" role="tab" data-tab="goals" aria-label="Goals">
-        <span class="ic">🎯</span> <span class="tab-label">Goals</span>
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></span> <span class="tab-label">Goals</span>
       </button>
     </nav>
-    <button class="btn ghost sm" onclick="openModal('data')" title="Backup / Restore">⇅</button>
-    <button class="btn ghost sm" id="lockBtn" onclick="handleLockButton()" title="Secure your data">🔓</button>
+    <button class="btn ghost sm" onclick="openModal('data')" title="Backup / Restore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 8 0 0 1 14-4.6M4 10V5M4 10h5"/><path d="M20 14a8 8 0 0 1-14 4.6M20 14v5m0-5h-5"/></svg></button>
+    <button class="btn ghost sm" id="lockBtn" onclick="handleLockButton()" title="Secure your data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 7.6-1.8"/></svg></button>
   </div>
 </header>
 
@@ -375,19 +341,19 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
   <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
     <button class="btn" onclick="switchTabTo('children')">
-      <span>👨‍👩‍👧‍👦</span> View Children
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="7" r="2.6"/><circle cx="16" cy="7" r="2.6"/><path d="M2.5 20v-2c0-2.5 2.5-4.2 5.5-4.2s5.5 1.7 5.5 4.2v2"/><path d="M10.5 20v-1.6c0-2.2 2.3-3.9 5.5-3.9s5.5 1.7 5.5 3.9V20"/></svg></span> View Children
     </button>
     <button class="btn" onclick="switchTabTo('money')">
-      <span>💰</span> View Money
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg></span> View Money
     </button>
     <button class="btn secondary" onclick="openModal('routine')">
-      <span>✅</span> Add Routine
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4.5" width="16" height="15" rx="2"/><path d="M8 9.5l2.2 2.2L15.5 7"/><path d="M8 15h8"/></svg></span> Add Routine
     </button>
     <button class="btn secondary" onclick="openModal('transaction')">
-      <span>💸</span> Log Transaction
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6.5 9v0M17.5 15v0"/></svg></span> Log Transaction
     </button>
     <button class="btn secondary" onclick="openModal('bill')">
-      <span>🔁</span> Add Bill
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 8 0 0 1 14-4.6M4 10V5M4 10h5"/><path d="M20 14a8 8 0 0 1-14 4.6M20 14v5m0-5h-5"/></svg></span> Add Bill
     </button>
   </div>
 </div>
@@ -411,12 +377,12 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
   <div id="childrenList" class="grid cards"></div>
   <div id="childrenEmpty" class="empty">
-    <div class="em">👶</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3"/><path d="M6 20.5v-1.8c0-2.8 2.7-5 6-5s6 2.2 6 5v1.8"/></svg></div>
     <h3>No children yet</h3>
     <p>Create a child profile to start tracking routines, habits, and milestones.</p>
   </div>
   <div id="childrenNoMatch" class="empty" style="display:none">
-    <div class="em">🔍</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5L15 15"/></svg></div>
     <h3>No matches</h3>
     <p>Try a different search term or filter.</p>
   </div>
@@ -427,7 +393,7 @@ nav.tabs::-webkit-scrollbar{display:none}
   <div class="section-head">
     <h2>Financial Dashboard</h2>
     <div style="display:flex;gap:8px;align-items:center">
-      <input type="month" id="monthPicker" style="padding:10px 14px;border:1px solid var(--stroke-strong);border-radius:10px;background:var(--glass-2);color:var(--ink);font-family:var(--font);cursor:pointer;font-size:.9rem;transition:all .2s var(--ease)" onchange="changeMonth()">
+      <input type="month" id="monthPicker" style="padding:10px 14px;border:var(--bw) solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--ink);font-family:var(--font);cursor:pointer;font-size:.9rem" onchange="changeMonth()">
       <button class="btn" onclick="openModal('transaction')">+ Transaction</button>
     </div>
   </div>
@@ -479,12 +445,12 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
   <div id="txList" class="grid"></div>
   <div id="txEmpty" class="empty">
-    <div class="em">📊</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M4 20h16"/></svg></div>
     <h3>No transactions yet</h3>
     <p>Start tracking your income and expenses to see them here.</p>
   </div>
   <div id="txNoMatch" class="empty" style="display:none">
-    <div class="em">🔍</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5L15 15"/></svg></div>
     <h3>No matches</h3>
     <p>Try a different search term or filter.</p>
   </div>
@@ -499,7 +465,7 @@ nav.tabs::-webkit-scrollbar{display:none}
   <div id="recurringSuggestions"></div>
   <div id="billList" class="grid"></div>
   <div id="billEmpty" class="empty">
-    <div class="em">🔁</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 8 0 0 1 14-4.6M4 10V5M4 10h5"/><path d="M20 14a8 8 0 0 1-14 4.6M20 14v5m0-5h-5"/></svg></div>
     <h3>No bills tracked</h3>
     <p>Add recurring bills to get reminded before they're due — or let Home Base detect them from your transactions below.</p>
   </div>
@@ -510,7 +476,7 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
   <div id="budgetList" class="grid"></div>
   <div id="budgetEmpty" class="empty">
-    <div class="em">📈</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M4 20h16"/></svg></div>
     <h3>No budgets set</h3>
     <p>Create budgets to track spending limits by category.</p>
   </div>
@@ -521,7 +487,7 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
   <div id="loanList" class="grid"></div>
   <div id="loanEmpty" class="empty">
-    <div class="em">📋</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="16" rx="2"/><rect x="8.5" y="3" width="7" height="4" rx="1"/><path d="M8.5 12h7"/><path d="M8.5 16h7"/></svg></div>
     <h3>No loans tracked</h3>
     <p>Add loans to monitor repayments and interest.</p>
   </div>
@@ -533,12 +499,12 @@ nav.tabs::-webkit-scrollbar{display:none}
     <p style="font-size:.8rem;color:var(--ink-faint);margin:-8px 0 14px">Two common orders people pay off multiple debts in. Neither accounts for exact minimum payments — pick whichever order suits you.</p>
     <div class="grid" style="grid-template-columns:1fr 1fr;gap:14px">
       <div class="card">
-        <h3 style="margin-bottom:4px">🔥 Avalanche</h3>
+        <h3 style="margin-bottom:4px"><svg style="width:.85em;height:.85em;vertical-align:-.1em;display:inline-block;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-3 4-3 7.5a3 3 0 0 0 6 0c1 .8 1.5 2 1.5 3.2A4.5 4.5 0 0 1 12 18a5 5 0 0 1-5-5c0-4 5-4 5-10z"/></svg> Avalanche</h3>
         <p style="font-size:.75rem;color:var(--ink-faint);margin-bottom:12px">Highest interest rate first — saves the most on interest overall.</p>
         <ol id="payoffAvalanche" style="margin:0;padding-left:20px;font-size:.85rem;line-height:1.8"></ol>
       </div>
       <div class="card">
-        <h3 style="margin-bottom:4px">❄️ Snowball</h3>
+        <h3 style="margin-bottom:4px"><svg style="width:.85em;height:.85em;vertical-align:-.1em;display:inline-block;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11"/></svg> Snowball</h3>
         <p style="font-size:.75rem;color:var(--ink-faint);margin-bottom:12px">Smallest balance first — clears debts faster for momentum.</p>
         <ol id="payoffSnowball" style="margin:0;padding-left:20px;font-size:.85rem;line-height:1.8"></ol>
       </div>
@@ -551,7 +517,7 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
   <div id="investmentList" class="grid"></div>
   <div id="investmentEmpty" class="empty">
-    <div class="em">📦</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8L12 4l8.5 4v8L12 20l-8.5-4V8z"/><path d="M3.5 8L12 12l8.5-4"/><path d="M12 12v8"/></svg></div>
     <h3>No assets tracked</h3>
     <p>Add savings, super, shares, or property to see your net worth on the Home tab.</p>
   </div>
@@ -596,7 +562,7 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
   <div id="savingsGoalList" class="grid cards"></div>
   <div id="savingsGoalEmpty" class="empty">
-    <div class="em">🎯</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div>
     <h3>No savings goals yet</h3>
     <p>Set a target — emergency fund, house deposit, holiday — and track your progress toward it.</p>
   </div>
@@ -607,7 +573,7 @@ nav.tabs::-webkit-scrollbar{display:none}
   </div>
   <div id="householdGoalList" class="grid"></div>
   <div id="householdGoalEmpty" class="empty">
-    <div class="em">🏡</div>
+    <div class="em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5L12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1V11.5z"/></svg></div>
     <h3>No household goals yet</h3>
     <p>Bigger-picture things you're working toward — a routine, a habit, a project — not tied to money.</p>
   </div>
@@ -664,8 +630,8 @@ nav.tabs::-webkit-scrollbar{display:none}
     <div class="field">
       <label>Type</label>
       <div class="type-toggle">
-        <button class="type-btn expense-btn active" id="typeExpense" onclick="setType('expense')">↙ Expense</button>
-        <button class="type-btn income-btn" id="typeIncome" onclick="setType('income')">↗ Income</button>
+        <button class="type-btn expense-btn active" id="typeExpense" onclick="setType('expense')"><svg style="width:.85em;height:.85em;vertical-align:-.1em;display:inline-block;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7L7 17"/><path d="M15 17H7V9"/></svg> Expense</button>
+        <button class="type-btn income-btn" id="typeIncome" onclick="setType('income')"><svg style="width:.85em;height:.85em;vertical-align:-.1em;display:inline-block;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg> Income</button>
       </div>
     </div>
     <div class="field">
@@ -1033,8 +999,8 @@ async function persistState() {
 function updateLockButton() {
   const btn = document.getElementById('lockBtn');
   if (!btn) return;
-  if (vaultPresent) { btn.textContent = '🔒'; btn.title = 'Lock Home Base'; }
-  else { btn.textContent = '🔓'; btn.title = 'Secure your data'; }
+  if (vaultPresent) { btn.innerHTML = icon('lock'); btn.title = 'Lock Home Base'; }
+  else { btn.innerHTML = icon('unlock'); btn.title = 'Secure your data'; }
 }
 
 function handleLockButton() {
@@ -1290,9 +1256,9 @@ function renderHomeAlerts() {
   state.bills.forEach(b => {
     const dateLabel = new Date(b.dueDate).toLocaleDateString('en-AU');
     if (b.dueDate < nowStr) {
-      alerts.push({ icon: '🔴', text: `${escapeHtml(b.name)} was due ${dateLabel} — $${b.amount.toFixed(2)}` });
+      alerts.push({ ic: 'alertDot', color: 'var(--danger)', text: `${escapeHtml(b.name)} was due ${dateLabel} — $${b.amount.toFixed(2)}` });
     } else if (b.dueDate <= soonStr) {
-      alerts.push({ icon: '🟡', text: `${escapeHtml(b.name)} due ${dateLabel} — $${b.amount.toFixed(2)}` });
+      alerts.push({ ic: 'alertDot', color: 'var(--warn)', text: `${escapeHtml(b.name)} due ${dateLabel} — $${b.amount.toFixed(2)}` });
     }
   });
 
@@ -1314,7 +1280,7 @@ function renderHomeAlerts() {
     if (!priorAmounts.length) return;
     const avg = priorAmounts.reduce((s,a) => s + a, 0) / priorAmounts.length;
     if (avg > 0 && catSpendThisMonth[cat] > avg * 1.5) {
-      alerts.push({ icon: '⚠️', text: `${categoryIcon(cat)} ${escapeHtml(cat)} spending is $${catSpendThisMonth[cat].toFixed(2)} this month, vs ~$${avg.toFixed(2)} usually` });
+      alerts.push({ ic: 'warning', color: 'var(--warn)', text: `${escapeHtml(cat)} spending is $${catSpendThisMonth[cat].toFixed(2)} this month, vs ~$${avg.toFixed(2)} usually` });
     }
   });
 
@@ -1328,23 +1294,70 @@ function renderHomeAlerts() {
   section.style.display = 'block';
   list.innerHTML = alerts.map(a => `
     <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 18px">
-      <div style="font-size:1.2rem">${a.icon}</div>
+      <div style="font-size:22px;flex:none;color:${a.color}">${icon(a.ic)}</div>
       <div style="font-size:.88rem">${a.text}</div>
     </div>
   `).join('');
 }
 
 // ── CHILDREN TAB ────────────────────────────────────────
+// ── ICON SYSTEM (replaces emoji — bold line icons, 24x24, currentColor) ──
+const ICON_PATHS = {
+  home: '<path d="M4 11.5L12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1V11.5z"/>',
+  family: '<circle cx="8" cy="7" r="2.6"/><circle cx="16" cy="7" r="2.6"/><path d="M2.5 20v-2c0-2.5 2.5-4.2 5.5-4.2s5.5 1.7 5.5 4.2v2"/><path d="M10.5 20v-1.6c0-2.2 2.3-3.9 5.5-3.9s5.5 1.7 5.5 3.9V20"/>',
+  wallet: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/>',
+  target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/>',
+  edit: '<path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20z"/><path d="M13.5 6.5L17.5 10.5"/>',
+  trash: '<path d="M5 7h14"/><path d="M9 7V4.5h6V7"/><path d="M7 7l1 12.5A1.5 1.5 0 0 0 9.5 21h5a1.5 1.5 0 0 0 1.5-1.5L17 7"/><path d="M10 11v6"/><path d="M14 11v6"/>',
+  close: '<path d="M6 6l12 12"/><path d="M18 6L6 18"/>',
+  check: '<path d="M4 12.5l5 5L20 6.5"/>',
+  lock: '<rect x="4.5" y="10.5" width="15" height="10" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+  unlock: '<rect x="4.5" y="10.5" width="15" height="10" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 7.6-1.8"/>',
+  sync: '<path d="M4 10a8 8 0 0 1 14-4.6M4 10V5M4 10h5"/><path d="M20 14a8 8 0 0 1-14 4.6M20 14v5m0-5h-5"/>',
+  routine: '<rect x="4" y="4.5" width="16" height="15" rx="2"/><path d="M8 9.5l2.2 2.2L15.5 7"/><path d="M8 15h8"/>',
+  cash: '<rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6.5 9v0M17.5 15v0"/>',
+  child: '<circle cx="12" cy="7.5" r="3"/><path d="M6 20.5v-1.8c0-2.8 2.7-5 6-5s6 2.2 6 5v1.8"/>',
+  barchart: '<path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M4 20h16"/>',
+  clipboard: '<rect x="5" y="5" width="14" height="16" rx="2"/><rect x="8.5" y="3" width="7" height="4" rx="1"/><path d="M8.5 12h7"/><path d="M8.5 16h7"/>',
+  fire: '<path d="M12 3c1 3-3 4-3 7.5a3 3 0 0 0 6 0c1 .8 1.5 2 1.5 3.2A4.5 4.5 0 0 1 12 18a5 5 0 0 1-5-5c0-4 5-4 5-10z"/>',
+  snow: '<path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11"/>',
+  arrowUpRight: '<path d="M7 17L17 7"/><path d="M9 7h8v8"/>',
+  arrowDownLeft: '<path d="M17 7L7 17"/><path d="M15 17H7V9"/>',
+  alertDot: '<circle cx="12" cy="12" r="8.5"/>',
+  warning: '<path d="M12 4l9 16H3L12 4z"/><path d="M12 10.5v4"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor"/>',
+  food: '<path d="M6 10a6 6 0 0 1 12 0z"/><path d="M4 10h16"/><path d="M5 13.5h14l-1.3 5A2 2 0 0 1 15.7 20H8.3a2 2 0 0 1-2-1.5L5 13.5z"/>',
+  car: '<path d="M4.5 15.5l1.4-5A2 2 0 0 1 7.8 9h8.4a2 2 0 0 1 1.9 1.5l1.4 5"/><rect x="3" y="15.5" width="18" height="4.5" rx="1.5"/><circle cx="7.5" cy="20" r="1.3"/><circle cx="16.5" cy="20" r="1.3"/>',
+  bulb: '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+  film: '<rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M8 5v14M16 5v14M3.5 10h4.5M3.5 14h4.5M16 10h4.5M16 14h4.5"/>',
+  cart: '<circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/><path d="M3 4h2.2l2.1 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6"/>',
+  health: '<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M12 8v8M8 12h8"/>',
+  bottle: '<path d="M10 3h4v3.2l1.5 2A3 3 0 0 1 16 10v9a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-9a3 3 0 0 1 .5-1.8l1.5-2V3z"/><path d="M9 14h6"/>',
+  box: '<path d="M3.5 8L12 4l8.5 4v8L12 20l-8.5-4V8z"/><path d="M3.5 8L12 12l8.5-4"/><path d="M12 12v8"/>',
+  card: '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 9.5h18"/>',
+  bank: '<path d="M4 10.5L12 5l8 5.5"/><rect x="4" y="10.5" width="16" height="8.5"/><path d="M2.5 19h19"/><path d="M7.5 10.5v8M12 10.5v8M16.5 10.5v8"/>',
+  pillar: '<path d="M5 20h14"/><path d="M6 20V9M18 20V9"/><path d="M4 9l8-5 8 5"/><path d="M9 20v-7M15 20v-7"/>',
+  house: '<path d="M4 11L12 4.5 20 11"/><path d="M6 11v9h12v-9"/><path d="M10 20v-5h4v5"/>',
+  coin: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.3 15h4a1.7 1.7 0 0 0 0-3.4h-2.6a1.7 1.7 0 0 1 0-3.4h4"/>',
+  trophy: '<path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5a2 2 0 0 0 0 4H7M17 6h2.5a2 2 0 0 1 0 4H17"/><path d="M12 14v3M9 20.5h6l-.7-3.5H9.7L9 20.5z"/>',
+  search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5L15 15"/>',
+  briefcase: '<rect x="3" y="7.5" width="18" height="12" rx="2"/><path d="M8.5 7.5V5.8A1.8 1.8 0 0 1 10.3 4h3.4a1.8 1.8 0 0 1 1.8 1.8V7.5"/><path d="M3 12.5h18"/>',
+  compass: '<circle cx="12" cy="12" r="8.5"/><path d="M15 9l-2 6-6 2 2-6z"/>'
+};
+function icon(name, cls) {
+  const body = ICON_PATHS[name] || ICON_PATHS.box;
+  return `<span class="ic${cls ? ' ' + cls : ''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</svg></span>`;
+}
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 const CATEGORY_ICONS = {
-  Food: '🍔', Transport: '🚗', Utilities: '💡', Entertainment: '🎬',
-  Groceries: '🛒', Health: '🏥', Personal: '🧴', Other: '📦',
-  salary: '💼', Salary: '💼'
+  Food: 'food', Transport: 'car', Utilities: 'bulb', Entertainment: 'film',
+  Groceries: 'cart', Health: 'health', Personal: 'bottle', Other: 'box',
+  salary: 'briefcase', Salary: 'briefcase'
 };
-function categoryIcon(category) { return CATEGORY_ICONS[category] || '💳'; }
+function categoryIcon(category) { return icon(CATEGORY_ICONS[category] || 'card'); }
 
 function updateChildrenTab() {
   const list = document.getElementById('childrenList');
@@ -1385,10 +1398,10 @@ function updateChildrenTab() {
     const routinesHtml = visibleRoutines.length
       ? `<ul class="routine-list">${visibleRoutines.map(r => `
           <li class="routine-item">
-            <button type="button" class="routine-check${r.completed ? ' done' : ''}" data-toggle-routine="${r.id}" aria-label="${r.completed ? 'Mark not done' : 'Mark done'}">${r.completed ? '✓' : ''}</button>
+            <button type="button" class="routine-check${r.completed ? ' done' : ''}" data-toggle-routine="${r.id}" aria-label="${r.completed ? 'Mark not done' : 'Mark done'}">${r.completed ? icon('check') : ''}</button>
             <span class="routine-text${r.completed ? ' done' : ''}">${escapeHtml(r.task)}</span>
-            <button type="button" class="routine-del" data-edit-routine="${r.id}" aria-label="Edit">✏️</button>
-            <button type="button" class="routine-del" data-del-routine="${r.id}" aria-label="Remove">✕</button>
+            <button type="button" class="routine-del" data-edit-routine="${r.id}" aria-label="Edit">${icon('edit')}</button>
+            <button type="button" class="routine-del" data-del-routine="${r.id}" aria-label="Remove">${icon('close')}</button>
           </li>`).join('')}</ul>`
       : `<div class="routine-empty">${allRoutines.length ? 'No routines match.' : 'No routines yet.'}</div>`;
 
@@ -1401,8 +1414,8 @@ function updateChildrenTab() {
             <div style="font-size:.85rem;color:var(--ink-faint);font-weight:500">${new Date().getFullYear() - child.birthYear} years old</div>
           </div>
           <div style="display:flex;gap:4px;flex-shrink:0">
-            <button class="btn ghost sm" onclick="openModal('child','${child.id}')" aria-label="Edit">✏️</button>
-            <button class="btn ghost sm" onclick="deleteChild('${child.id}')" aria-label="Delete">🗑</button>
+            <button class="btn ghost sm" onclick="openModal('child','${child.id}')" aria-label="Edit">${icon('edit')}</button>
+            <button class="btn ghost sm" onclick="deleteChild('${child.id}')" aria-label="Delete">${icon('trash')}</button>
           </div>
         </div>
         <div style="font-size:.75rem;font-weight:600;padding:6px 12px;border-radius:999px;background:rgba(110,231,199,.12);color:var(--a1);border:1px solid rgba(110,231,199,.2);width:fit-content">${completed}/${allRoutines.length} routines</div>
@@ -1497,8 +1510,8 @@ function updateMoneyTab() {
         <div class="tx-right">
           <div class="tx-amount ${tx.type}">${tx.type === 'income' ? '+' : '-'}$${tx.amount.toFixed(2)}</div>
           <div style="display:flex;gap:4px;justify-content:flex-end;margin-top:4px">
-            <button class="btn ghost sm" onclick="openModal('transaction','${tx.id}')" aria-label="Edit">✏️</button>
-            <button class="btn ghost sm" onclick="deleteTransaction('${tx.id}')" aria-label="Delete">🗑</button>
+            <button class="btn ghost sm" onclick="openModal('transaction','${tx.id}')" aria-label="Edit">${icon('edit')}</button>
+            <button class="btn ghost sm" onclick="deleteTransaction('${tx.id}')" aria-label="Delete">${icon('trash')}</button>
           </div>
         </div>
       </div>
@@ -1526,8 +1539,8 @@ function updateMoneyTab() {
           <div class="budget-top">
             <div>${categoryIcon(budget.category)} ${escapeHtml(budget.category)}</div>
             <div style="display:flex;gap:4px">
-              <button class="btn ghost sm" onclick="openModal('budget','${budget.id}')" aria-label="Edit">✏️</button>
-              <button class="btn ghost sm" onclick="deleteBudget('${budget.id}')" aria-label="Delete">🗑</button>
+              <button class="btn ghost sm" onclick="openModal('budget','${budget.id}')" aria-label="Edit">${icon('edit')}</button>
+              <button class="btn ghost sm" onclick="deleteBudget('${budget.id}')" aria-label="Delete">${icon('trash')}</button>
             </div>
           </div>
           <div style="font-size:.8rem;color:var(--ink-faint);margin-bottom:8px">$${spent.toFixed(2)} / $${budget.limit.toFixed(2)}</div>
@@ -1554,10 +1567,10 @@ function updateMoneyTab() {
       return `
         <div class="budget-item" style="--delay:${idx}">
           <div class="budget-top">
-            <div>🏦 ${escapeHtml(loan.name)}</div>
+            <div>${icon('bank')} ${escapeHtml(loan.name)}</div>
             <div style="display:flex;gap:4px">
-              <button class="btn ghost sm" onclick="openModal('loan','${loan.id}')" aria-label="Edit">✏️</button>
-              <button class="btn ghost sm" onclick="deleteLoan('${loan.id}')" aria-label="Delete">🗑</button>
+              <button class="btn ghost sm" onclick="openModal('loan','${loan.id}')" aria-label="Edit">${icon('edit')}</button>
+              <button class="btn ghost sm" onclick="deleteLoan('${loan.id}')" aria-label="Delete">${icon('trash')}</button>
             </div>
           </div>
           <div style="font-size:.8rem;color:var(--ink-faint);margin-bottom:8px">$${loan.remaining.toFixed(2)} / $${loan.total.toFixed(2)} remaining</div>
@@ -1584,7 +1597,7 @@ function renderBills() {
         <div style="font-size:.78rem;color:var(--ink-faint)">~$${c.avgAmount.toFixed(2)} · seen ${c.count} times · ${escapeHtml(c.category)}</div>
       </div>
       <button class="btn secondary sm" onclick="addRecurringCandidate('${c.key.replace(/'/g, "\\'")}','${c.desc.replace(/'/g, "\\'")}','${c.category}',${c.avgAmount})">Track as bill</button>
-      <button class="btn ghost sm" onclick="dismissRecurringCandidate('${c.key.replace(/'/g, "\\'")}')" aria-label="Dismiss">✕</button>
+      <button class="btn ghost sm" onclick="dismissRecurringCandidate('${c.key.replace(/'/g, "\\'")}')" aria-label="Dismiss">${icon('close')}</button>
     </div>
   `).join('');
 
@@ -1604,8 +1617,8 @@ function renderBills() {
         <div class="budget-top">
           <div>${categoryIcon(b.category)} ${escapeHtml(b.name)}${b.recurring ? ' <span style="font-size:.7rem;color:var(--ink-faint)">(monthly)</span>' : ''}</div>
           <div style="display:flex;gap:4px">
-            <button class="btn ghost sm" onclick="openModal('bill','${b.id}')" aria-label="Edit">✏️</button>
-            <button class="btn ghost sm" onclick="deleteBill('${b.id}')" aria-label="Delete">🗑</button>
+            <button class="btn ghost sm" onclick="openModal('bill','${b.id}')" aria-label="Edit">${icon('edit')}</button>
+            <button class="btn ghost sm" onclick="deleteBill('${b.id}')" aria-label="Delete">${icon('trash')}</button>
           </div>
         </div>
         <div style="font-size:.8rem;color:${overdue ? 'var(--danger)' : 'var(--ink-faint)'};margin-bottom:10px">
@@ -1626,14 +1639,14 @@ function renderInvestments() {
     return;
   }
   empty.style.display = 'none';
-  const typeIcons = { 'Savings': '💰', 'Super / Retirement': '🏛️', 'Shares / ETFs': '📈', 'Property': '🏠', 'Crypto': '🪙', 'Other': '📦' };
+  const typeIcons = { 'Savings': 'wallet', 'Super / Retirement': 'pillar', 'Shares / ETFs': 'barchart', 'Property': 'house', 'Crypto': 'coin', 'Other': 'box' };
   list.innerHTML = state.investments.map((inv, idx) => `
     <div class="budget-item" style="--delay:${idx}">
       <div class="budget-top">
-        <div>${typeIcons[inv.type] || '📦'} ${escapeHtml(inv.name)}</div>
+        <div>${icon(typeIcons[inv.type] || 'box')} ${escapeHtml(inv.name)}</div>
         <div style="display:flex;gap:4px">
-          <button class="btn ghost sm" onclick="openModal('investment','${inv.id}')" aria-label="Edit">✏️</button>
-          <button class="btn ghost sm" onclick="deleteInvestment('${inv.id}')" aria-label="Delete">🗑</button>
+          <button class="btn ghost sm" onclick="openModal('investment','${inv.id}')" aria-label="Edit">${icon('edit')}</button>
+          <button class="btn ghost sm" onclick="deleteInvestment('${inv.id}')" aria-label="Delete">${icon('trash')}</button>
         </div>
       </div>
       <div style="font-size:.8rem;color:var(--ink-faint)">${escapeHtml(inv.type)} · $${inv.value.toFixed(2)}</div>
@@ -2212,15 +2225,15 @@ function renderSavingsGoals() {
       const weeksLeft = Math.max(1, Math.ceil((new Date(g.targetDate) - new Date(todayStr)) / (7 * 86400000)));
       contribHint = `~$${(remaining / weeksLeft).toFixed(2)}/week to reach it by ${new Date(g.targetDate).toLocaleDateString('en-AU')}`;
     } else if (remaining === 0) {
-      contribHint = '🎉 Goal reached!';
+      contribHint = icon('trophy') + ' Goal reached!';
     }
     return `
       <div class="card" style="--delay:${idx}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div style="font-weight:700;font-family:var(--font-head)">${escapeHtml(g.title)}</div>
           <div style="display:flex;gap:4px">
-            <button class="btn ghost sm" onclick="openModal('savingsGoal','${g.id}')" aria-label="Edit">✏️</button>
-            <button class="btn ghost sm" onclick="deleteSavingsGoal('${g.id}')" aria-label="Delete">🗑</button>
+            <button class="btn ghost sm" onclick="openModal('savingsGoal','${g.id}')" aria-label="Edit">${icon('edit')}</button>
+            <button class="btn ghost sm" onclick="deleteSavingsGoal('${g.id}')" aria-label="Delete">${icon('trash')}</button>
           </div>
         </div>
         <div style="font-size:.85rem;color:var(--ink-faint);margin-bottom:8px">$${g.currentAmount.toFixed(2)} / $${g.targetAmount.toFixed(2)}</div>
@@ -2244,13 +2257,13 @@ function renderHouseholdGoals() {
   empty.style.display = 'none';
   list.innerHTML = state.householdGoals.map((g, idx) => `
     <div class="routine-item" style="--delay:${idx};align-items:flex-start">
-      <button type="button" class="routine-check${g.completed ? ' done' : ''}" onclick="toggleHouseholdGoal('${g.id}')" aria-label="${g.completed ? 'Mark not done' : 'Mark done'}">${g.completed ? '✓' : ''}</button>
+      <button type="button" class="routine-check${g.completed ? ' done' : ''}" onclick="toggleHouseholdGoal('${g.id}')" aria-label="${g.completed ? 'Mark not done' : 'Mark done'}">${g.completed ? icon('check') : ''}</button>
       <div style="flex:1">
         <div class="routine-text${g.completed ? ' done' : ''}">${escapeHtml(g.title)}</div>
         ${g.notes ? `<div style="font-size:.78rem;color:var(--ink-faint);margin-top:2px">${escapeHtml(g.notes)}</div>` : ''}
       </div>
-      <button type="button" class="routine-del" onclick="openModal('householdGoal','${g.id}')" aria-label="Edit">✏️</button>
-      <button type="button" class="routine-del" onclick="deleteHouseholdGoal('${g.id}')" aria-label="Remove">✕</button>
+      <button type="button" class="routine-del" onclick="openModal('householdGoal','${g.id}')" aria-label="Edit">${icon('edit')}</button>
+      <button type="button" class="routine-del" onclick="deleteHouseholdGoal('${g.id}')" aria-label="Remove">${icon('close')}</button>
     </div>
   `).join('');
 }
