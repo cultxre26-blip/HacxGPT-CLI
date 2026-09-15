@@ -664,7 +664,7 @@ nav.tabs::-webkit-scrollbar{display:none}
     </div>
     <div class="field">
       <label>Birth Year</label>
-      <input type="number" id="childYear" placeholder="2020" min="2000" max="2030">
+      <input type="number" id="childYear" placeholder="e.g. 2020" min="2000" max="2030">
     </div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeModal('child')">Cancel</button>
@@ -711,7 +711,7 @@ nav.tabs::-webkit-scrollbar{display:none}
     </div>
     <div class="field">
       <label>Amount (AUD)</label>
-      <input type="number" id="txAmount" placeholder="0.00" step="0.01" min="0">
+      <input type="number" id="txAmount" placeholder="e.g. 45.00" step="0.01" min="0">
     </div>
     <div class="field">
       <label>Category</label>
@@ -757,7 +757,7 @@ nav.tabs::-webkit-scrollbar{display:none}
     </div>
     <div class="field">
       <label>Monthly Limit (AUD)</label>
-      <input type="number" id="budgetAmount" placeholder="0.00" step="0.01" min="0">
+      <input type="number" id="budgetAmount" placeholder="e.g. 400.00" step="0.01" min="0">
     </div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeModal('budget')">Cancel</button>
@@ -777,15 +777,15 @@ nav.tabs::-webkit-scrollbar{display:none}
     </div>
     <div class="field">
       <label>Total Amount (AUD)</label>
-      <input type="number" id="loanTotal" placeholder="0.00" step="0.01" min="0">
+      <input type="number" id="loanTotal" placeholder="e.g. 15000.00" step="0.01" min="0">
     </div>
     <div class="field">
       <label>Remaining (AUD)</label>
-      <input type="number" id="loanRemaining" placeholder="0.00" step="0.01" min="0">
+      <input type="number" id="loanRemaining" placeholder="e.g. 8000.00" step="0.01" min="0">
     </div>
     <div class="field">
       <label>Interest Rate (%)</label>
-      <input type="number" id="loanRate" placeholder="0.00" step="0.01" min="0">
+      <input type="number" id="loanRate" placeholder="e.g. 5.5" step="0.01" min="0">
     </div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeModal('loan')">Cancel</button>
@@ -805,7 +805,7 @@ nav.tabs::-webkit-scrollbar{display:none}
     </div>
     <div class="field">
       <label>Amount (AUD)</label>
-      <input type="number" id="billAmount" placeholder="0.00" step="0.01" min="0">
+      <input type="number" id="billAmount" placeholder="e.g. 45.00" step="0.01" min="0">
     </div>
     <div class="field">
       <label>Category</label>
@@ -825,10 +825,14 @@ nav.tabs::-webkit-scrollbar{display:none}
       <input type="date" id="billDueDate">
     </div>
     <div class="field">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0">
-        <input type="checkbox" id="billRecurring" style="width:auto">
-        Repeats monthly
-      </label>
+      <label>Repeats</label>
+      <select id="billFrequency">
+        <option value="none">Never (one-off)</option>
+        <option value="weekly">Weekly</option>
+        <option value="fortnightly">Fortnightly</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
     </div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeModal('bill')">Cancel</button>
@@ -859,7 +863,7 @@ nav.tabs::-webkit-scrollbar{display:none}
     </div>
     <div class="field">
       <label>Current Value (AUD)</label>
-      <input type="number" id="investValue" placeholder="0.00" step="0.01" min="0">
+      <input type="number" id="investValue" placeholder="e.g. 5000.00" step="0.01" min="0">
     </div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeModal('investment')">Cancel</button>
@@ -879,11 +883,11 @@ nav.tabs::-webkit-scrollbar{display:none}
     </div>
     <div class="field">
       <label>Target Amount (AUD)</label>
-      <input type="number" id="goalTarget" placeholder="0.00" step="0.01" min="0">
+      <input type="number" id="goalTarget" placeholder="e.g. 5000.00" step="0.01" min="0">
     </div>
     <div class="field">
       <label>Current Amount Saved (AUD)</label>
-      <input type="number" id="goalCurrent" placeholder="0.00" step="0.01" min="0">
+      <input type="number" id="goalCurrent" placeholder="e.g. 1200.00" step="0.01" min="0">
     </div>
     <div class="field">
       <label>Target Date (optional)</label>
@@ -1011,6 +1015,9 @@ function fillDefaults(s) {
   s.budgets = s.budgets || [];
   s.loans = s.loans || [];
   s.bills = s.bills || [];
+  s.bills.forEach(b => {
+    if (!b.frequency) b.frequency = b.recurring ? 'monthly' : 'none';
+  });
   s.investments = s.investments || [];
   s.dismissedRecurring = s.dismissedRecurring || [];
   s.savingsGoals = s.savingsGoals || [];
@@ -1686,7 +1693,7 @@ function renderBills() {
     return `
       <div class="budget-item" style="--delay:${idx}">
         <div class="budget-top">
-          <div>${categoryIcon(b.category)} ${escapeHtml(b.name)}${b.recurring ? ' <span style="font-size:.7rem;color:var(--ink-faint)">(monthly)</span>' : ''}</div>
+          <div>${categoryIcon(b.category)} ${escapeHtml(b.name)}${b.frequency && b.frequency !== 'none' ? ` <span style="font-size:.7rem;color:var(--ink-faint)">(${b.frequency})</span>` : ''}</div>
           <div style="display:flex;gap:4px">
             <button class="btn ghost sm" onclick="openModal('bill','${b.id}')" aria-label="Edit">${icon('edit')}</button>
             <button class="btn ghost sm" onclick="deleteBill('${b.id}')" aria-label="Delete">${icon('trash')}</button>
@@ -1772,7 +1779,10 @@ function openModal(type, id) {
   } else if (type === 'routine') {
     editingRoutineId = id || null;
     const childSelect = document.getElementById('routineChild');
-    childSelect.innerHTML = Object.values(state.children).map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+    const childOptions = Object.values(state.children);
+    childSelect.innerHTML = childOptions.length
+      ? childOptions.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')
+      : '<option value="" disabled selected>Add a child first…</option>';
     if (id) {
       const r = state.routines.find(x => x.id === id);
       childSelect.value = r.childId;
@@ -1838,13 +1848,13 @@ function openModal(type, id) {
       document.getElementById('billAmount').value = b.amount;
       document.getElementById('billCat').value = b.category;
       document.getElementById('billDueDate').value = b.dueDate;
-      document.getElementById('billRecurring').checked = !!b.recurring;
+      document.getElementById('billFrequency').value = b.frequency || 'none';
       document.querySelector('#billModal h2').textContent = 'Edit Bill';
     } else {
       document.getElementById('billName').value = '';
       document.getElementById('billAmount').value = '';
       document.getElementById('billDueDate').value = new Date().toISOString().slice(0,10);
-      document.getElementById('billRecurring').checked = false;
+      document.getElementById('billFrequency').value = 'none';
       document.querySelector('#billModal h2').textContent = 'Add Bill';
     }
     document.getElementById('billModal').classList.add('open');
@@ -2083,14 +2093,14 @@ function saveBill() {
   const amount = parseFloat(document.getElementById('billAmount').value);
   const category = document.getElementById('billCat').value;
   const dueDate = document.getElementById('billDueDate').value;
-  const recurring = document.getElementById('billRecurring').checked;
+  const frequency = document.getElementById('billFrequency').value;
   if (!name || !amount || amount <= 0 || !dueDate) return showToast('Please fill in all fields', 'error');
 
   if (editingBillId) {
     const b = state.bills.find(x => x.id === editingBillId);
-    b.name = name; b.amount = amount; b.category = category; b.dueDate = dueDate; b.recurring = recurring;
+    b.name = name; b.amount = amount; b.category = category; b.dueDate = dueDate; b.frequency = frequency;
   } else {
-    state.bills.push({ id: Date.now().toString(), name, amount, category, dueDate, recurring, autoDetected: false });
+    state.bills.push({ id: Date.now().toString(), name, amount, category, dueDate, frequency, autoDetected: false });
   }
   persistState();
   closeModal('bill');
@@ -2115,12 +2125,16 @@ function markBillPaid(id) {
     category: b.category,
     date: new Date().toISOString().slice(0,10)
   });
-  if (b.recurring) {
-    const d = new Date(b.dueDate + 'T00:00:00');
-    d.setMonth(d.getMonth() + 1);
-    b.dueDate = d.toISOString().slice(0,10);
-  } else {
+  const freq = b.frequency || 'none';
+  if (freq === 'none') {
     state.bills = state.bills.filter(x => x.id !== id);
+  } else {
+    const d = new Date(b.dueDate + 'T00:00:00');
+    if (freq === 'weekly') d.setDate(d.getDate() + 7);
+    else if (freq === 'fortnightly') d.setDate(d.getDate() + 14);
+    else if (freq === 'yearly') d.setFullYear(d.getFullYear() + 1);
+    else d.setMonth(d.getMonth() + 1); // monthly
+    b.dueDate = d.toISOString().slice(0,10);
   }
   persistState();
   updateAllTabs();
@@ -2152,7 +2166,7 @@ function addRecurringCandidate(key, desc, category, amount) {
   nextMonth.setMonth(nextMonth.getMonth() + 1);
   state.bills.push({
     id: Date.now().toString(), name: desc, amount: Math.round(amount * 100) / 100,
-    category, dueDate: nextMonth.toISOString().slice(0,10), recurring: true, autoDetected: true
+    category, dueDate: nextMonth.toISOString().slice(0,10), frequency: 'monthly', autoDetected: true
   });
   state.dismissedRecurring.push(key);
   persistState();
@@ -2207,7 +2221,7 @@ async function importFromJaysDay() {
     state.bills.push({
       id: Date.now().toString() + Math.random().toString(36).slice(2,6),
       name: String(i.text || 'Imported item'), amount: 0, category: 'Other',
-      dueDate: i.due, recurring: false, autoDetected: false, importedFromJaysDay: true
+      dueDate: i.due, frequency: 'none', autoDetected: false, importedFromJaysDay: true
     });
   });
   persistState();
