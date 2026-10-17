@@ -48,6 +48,24 @@
          
         ],
         "default_model": "xiaomi/mimo-v2-flash"
+    },
+    "xai": {
+        "base_url": "https://api.x.ai/v1",
+        "key_var": "HACX_XAI_KEY",
+        "models": [
+            {
+                "name": "grok-4",
+                "alias": "Grok 4"
+            },
+            {
+                "name": "grok-4-fast",
+                "alias": "Grok 4 Fast"
+            },
+            {
+                "name": "grok-3-mini",
+                "alias": "Grok 3 Mini"
+            }
+        ],
+        "default_model": "grok-4"
     }
-
 }
