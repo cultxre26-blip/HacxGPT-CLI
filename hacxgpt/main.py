@@ -307,18 +307,25 @@ class App:
             self.ui.console.print("[red]System Halted: Authorization missing.[/]")
             return
 
+        menu_options = [
+            "Initialize Uplink (Start Chatting)",
+            "Security Keys (Configure API)",
+            "System Manifesto (About HacxGPT)",
+            "System Update (Check latest version)",
+            "Terminate Session (Exit)",
+        ]
+
         while True:
             self.ui.banner()
-            self.ui.main_menu()
-            choice = self.ui.get_input("MENU")
-            
-            if choice == '1':
+            index = self.ui.select_menu(menu_options, title="⚡ SYSTEM INTERFACE ⚡")
+
+            if index == 0:
                 self.run_chat()
-            elif choice == '2':
+            elif index == 1:
                 self.configure_key()
-            elif choice == '3':
+            elif index == 2:
                 self.about()
-            elif choice == '4':
+            elif index == 3:
                 success, msg = Updater.update()
                 if success:
                     self.ui.show_msg("Success", f"{msg}\n[bold red]RESTARTING APP...[/]", "green")
@@ -327,14 +334,11 @@ class App:
                     os.execv(sys.executable, [sys.executable] + sys.argv)
                 else:
                     self.ui.show_msg("Error", msg, "red")
-            elif choice == '5':
+            elif index == 4 or index == -1:
                 self.ui.console.print("[bold red]Terminating connection...[/]")
                 time.sleep(0.5)
                 self.ui.clear()
                 sys.exit(0)
-            else:
-                self.ui.console.print("[red]Invalid Command[/]")
-                time.sleep(0.5)
 
 def main():
     try:

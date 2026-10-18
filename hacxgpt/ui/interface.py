@@ -41,13 +41,13 @@ class UI:
         table = Table(show_header=False, box=None, padding=(0, 2))
         table.add_column("Icon", style="bold yellow", justify="right")
         table.add_column("Option", style="bold bright_white")
-        
+
         table.add_row("[1]", "Initialize Uplink [dim](Start Chatting)[/]")
         table.add_row("[2]", "Security Keys [dim](Configure API)[/]")
         table.add_row("[3]", "System Manifesto [dim](About HacxGPT)[/]")
         table.add_row("[4]", "System Update [dim](Check latest version)[/]")
         table.add_row("[5]", "Terminate Session [dim](Exit)[/]")
-        
+
         panel = Panel(
             Align.center(table),
             title="[bold cyan]⚡ SYSTEM INTERFACE ⚡[/bold cyan]",
@@ -56,6 +56,80 @@ class UI:
             subtitle="[dim]Select an option to proceed[/]"
         )
         self.console.print(panel)
+
+    def _numbered_fallback(self, options: list, title: str = "") -> int:
+        """Plain numbered selection for non-interactive terminals (pipes, CI)."""
+        if title:
+            self.console.print(f"[bold cyan]{title}[/]")
+        for i, opt in enumerate(options, 1):
+            self.console.print(f" [{i}] {opt}")
+        choice = self.get_input("Select #")
+        if choice.isdigit() and 1 <= int(choice) <= len(options):
+            return int(choice) - 1
+        return -1
+
+    def select_menu(self, options: list, title: str = "") -> int:
+        """
+        Arrow-key driven selector. Returns the selected index, or -1 if cancelled.
+        Falls back to plain numbered input if the terminal doesn't support it.
+        """
+        import sys
+
+        if not sys.stdin.isatty() or not sys.stdout.isatty():
+            return self._numbered_fallback(options, title)
+
+        from prompt_toolkit.application import Application
+        from prompt_toolkit.key_binding import KeyBindings
+        from prompt_toolkit.layout import Layout, Window
+        from prompt_toolkit.layout.controls import FormattedTextControl
+
+        state = {"index": 0}
+        kb = KeyBindings()
+
+        @kb.add("up")
+        @kb.add("k")
+        def _(event):
+            state["index"] = (state["index"] - 1) % len(options)
+
+        @kb.add("down")
+        @kb.add("j")
+        def _(event):
+            state["index"] = (state["index"] + 1) % len(options)
+
+        @kb.add("enter")
+        def _(event):
+            event.app.exit(result=state["index"])
+
+        @kb.add("c-c")
+        @kb.add("escape")
+        def _(event):
+            event.app.exit(result=-1)
+
+        def render():
+            lines = []
+            if title:
+                lines.append(("class:title", f" {title}\n\n"))
+            for i, opt in enumerate(options):
+                if i == state["index"]:
+                    lines.append(("class:selected", f" ➤ {opt}\n"))
+                else:
+                    lines.append(("class:option", f"   {opt}\n"))
+            return lines
+
+        control = FormattedTextControl(render, key_bindings=kb)
+        layout = Layout(Window(content=control))
+
+        style = Style.from_dict({
+            "title": "bold ansicyan",
+            "selected": "bold ansiyellow reverse",
+            "option": "ansiwhite",
+        })
+
+        try:
+            app = Application(layout=layout, style=style, key_bindings=kb, full_screen=False)
+            return app.run()
+        except Exception:
+            return self._numbered_fallback(options, title)
 
     def show_msg(self, title: str, content: str, color: str = "white"):
         self.console.print(Panel(content, title=f"[bold]{title}[/]", border_style=color, padding=(1, 2)))

@@ -156,6 +156,7 @@ HacxGPT-CLI provides a versatile interface for a wide range of models through mu
 | **HacxGPT** | `hacxgpt-lightning` | Production coding, Truely uncensored |
 | **Groq** | `kimi-k2-instruct-0905`, `qwen3-32b` |
 | **OpenRouter** | `mimo-v2-flash`, `devstral-2512`, `glm-4.5-air`, `kimi-k2`, `deepseek-r1t-chimera` |
+| **Local** | `DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF` | Fully offline, self-hosted, uncensored |
 
 
 > [!TIP]
@@ -214,6 +215,12 @@ If you're just experimenting, try lower-cost or free-tier models where available
 - Visit [hacxgpt.com](https://hacxgpt.com) to learn about our custom models
 - Join [Telegram](https://t.me/HacxGPT) for API access and pricing
 - Get access to extended context and production-grade models
+
+**Option 4: Local / Self-Hosted GGUF Models (No API Key, Fully Offline)**
+- Download a GGUF model such as [DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF](https://huggingface.co/DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF) from Hugging Face
+- Serve it locally with an OpenAI-compatible server, e.g. [llama.cpp's `llama-server`](https://github.com/ggml-org/llama.cpp) (`llama-server -m model.gguf --port 8080`) or LM Studio
+- Select the **`local`** provider in HacxGPT-CLI and enter any placeholder value for the API key (local servers don't require one)
+- If your local server listens on a different host/port, edit the `base_url` for the `local` provider in `providers.json`
 
 ### ⚙️ Installation
 
